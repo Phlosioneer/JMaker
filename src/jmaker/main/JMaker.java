@@ -1,4 +1,4 @@
-package main;
+package jmaker.main;
 
 import java.io.File;
 import java.util.ArrayList;

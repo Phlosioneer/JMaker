@@ -1,4 +1,4 @@
-package parser;
+package jmaker.parser;
 
 public enum TokenType {
 	// Singles
@@ -14,11 +14,13 @@ public enum TokenType {
 	DOUBLE_EQUAL, BANG_EQUAL, LESS_EQUAL, GREATER_EQUAL, DOUBLE_AND, DOUBLE_OR,
 
 	// Literals
-	STRING, INT, DOUBLE,
+	STRING, INT, DOUBLE, TRUE, FALSE,
 
 	// Keywords
-	IF, WHILE, DO, FOR,
+	IF, WHILE, FOR, ELSE,
 
 	// A variable or function name
-	NAME
+	NAME,
+
+	EOF
 }

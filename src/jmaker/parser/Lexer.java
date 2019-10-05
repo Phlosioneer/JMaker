@@ -1,9 +1,9 @@
-package parser;
+package jmaker.parser;
 
 import java.util.ArrayList;
 
 public class Lexer {
-	private String text;
+	private final String text;
 	private int currentLine;
 	private int currentColumn;
 	private int currentIndex;
@@ -28,6 +28,7 @@ public class Lexer {
 			ret.add(next);
 		}
 
+		ret.add(new Token('\0', TokenType.EOF));
 		return ret;
 	}
 
@@ -149,14 +150,20 @@ public class Lexer {
 		if (finalString.equals("if")) {
 			return new Token(finalString, TokenType.IF);
 		}
-		if (finalString.equals("do")) {
-			return new Token(finalString, TokenType.DO);
-		}
 		if (finalString.equals("for")) {
 			return new Token(finalString, TokenType.FOR);
 		}
 		if (finalString.equals("while")) {
 			return new Token(finalString, TokenType.WHILE);
+		}
+		if (finalString.equals("else")) {
+			return new Token(finalString, TokenType.ELSE);
+		}
+		if (finalString.equals("true")) {
+			return new Token(finalString, TokenType.TRUE);
+		}
+		if (finalString.equals("false")) {
+			return new Token(finalString, TokenType.FALSE);
 		}
 		return new Token(ret.toString(), TokenType.NAME);
 	}

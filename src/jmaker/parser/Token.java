@@ -1,4 +1,4 @@
-package parser;
+package jmaker.parser;
 
 public class Token {
 	public final String text;

@@ -1,4 +1,4 @@
-package main;
+package jmaker.main;
 
 public class DependGraph {
 

@@ -1,0 +1,50 @@
+# antlr-ish reference for grammar
+#
+# 0 or more times: ( )*
+# 1 or more times: ( )+
+# 0 or 1 times: ( )?
+
+file = ( statement )*
+statement = assignment | if | while | for | rule | ( ">" )? expression ";"
+
+# Variables
+assignment = name ( "[" expression "]" )* "=" expression ";"
+
+# Control structures.
+if = "if" expression block ( "else" "if" expression block )* ( "else" block )?
+while = "while" expression block
+for = "for" "(" assignment ";" expression ";" assignment ")" block
+block = "{" ( statement )* "}"
+
+# Zero or more expressions, separated by commas.
+expressionList = ( expression ( "," expression )* )?
+
+# Makefile-style rules
+rule = expression ( "," expression )* ":" expressionList block
+
+# Arrays and dictionaries
+arrayLiteral = "[" expressionList ( "," )? "]"
+dictLiteral = "{" ( keyValuePair ( "," keyValuePair )* )? ( "," )? "}"
+keyValuePair = expression ":" expression
+
+# The following is roughly equivalent to:
+#   expression = binary | unary | primary | arrayLiteral | dictLiteral | "(" expression ")" | functionCall | literal
+#   binary = expression ( "*" | "/" | "-" | "+" | "==" | "!=" | "<" | "<=" | ">" | ">=" ) expression
+#   unary = ( "!" | "-" ) expression
+#   functionCall = ( name | "(" expression ")" ) "(" expressionList ")"
+#	literal = NUMBER | STRING | "true" | "false"
+#
+# However, that grammar is ambiguous, and also doesn't encode associativity and order of
+# operations. That formulation also doesn't account for non-chainable binary operators.
+
+expression = and ( "||" and )*
+and = equality ( "&&" equality )*
+equality = comparison ( ( "==" | "!=" ) comparison )? # Can't be chained 
+comparison = addSub ( ( "<" | "<=" | ">" | ">=" ) addSub )? # Can't be chained
+addSub = multDiv ( ( "-" | "+" ) multDiv )*
+multDiv = unary ( ( "*" | "/" ) unary )*
+unary = ( ( "!" | "-" ) unary ) | primary
+primary = literal | "(" expression ")" ( index | args )? | name ( index | args )?
+literal = NUMBER | STRING | "true" | "false" | arrayLiteral | dictLiteral
+args = "(" expressionList ")"
+index = ( "[" expression "]" )+
