@@ -1,6 +1,7 @@
 package jmaker.parser;
 
 import java.util.ArrayList;
+import tests.TestUtil;
 
 public class Expression {
 
@@ -60,11 +61,26 @@ public class Expression {
 
 	public static class FunctionCall extends Expression {
 		public final Expression functionName;
-		public final ArrayList<Expression> args;
+		public final Expression[] args;
 
 		public FunctionCall(Expression functionName, ArrayList<Expression> args) {
+			this(functionName, args.toArray(size->new Expression[size]));
+		}
+
+		public FunctionCall(Expression functionName, Expression[] args) {
 			this.functionName = functionName;
 			this.args = args;
+		}
+
+		@Override
+		public String toString() {
+			var ret = new StringBuilder();
+			ret.append("{FunctionCall, function: ");
+			ret.append(functionName);
+			ret.append(", args: ");
+			ret.append(TestUtil.arrayToString(args));
+			ret.append("}");
+			return ret.toString();
 		}
 	}
 
@@ -122,10 +138,10 @@ public class Expression {
 		}
 	}
 
-	public static class VariableName extends Expression {
+	public static class Symbol extends Expression {
 		public final String name;
 
-		public VariableName(String name) {
+		public Symbol(String name) {
 			this.name = name;
 		}
 

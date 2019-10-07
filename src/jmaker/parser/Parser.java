@@ -1,6 +1,7 @@
 package jmaker.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Parser {
 	private final ArrayList<Token> tokens;
@@ -11,7 +12,7 @@ public class Parser {
 		currentIndex = 0;
 	}
 
-	public ArrayList<Statement> parseFile() {
+	public Block parseFile() {
 		ArrayList<Statement> ret = new ArrayList<>();
 		while (currentIndex < tokens.size()) {
 			Statement next = parseStatement();
@@ -20,7 +21,7 @@ public class Parser {
 			}
 			ret.add(next);
 		}
-		return ret;
+		return new Block(ret);
 	}
 
 	private Statement parseStatement() {
@@ -72,11 +73,20 @@ public class Parser {
 						isExpression = true;
 						break;
 					}
+					if (current.type == TokenType.COLON) {
+						isRule = true;
+						break;
+					}
 				}
 				if (isAssignment) {
-					return parseAssignment();
+					return parseAssignment(true);
 				} else if (isExpression) {
-					return new Statement.ExpressionStatement(parseExpression(), false);
+					var expression2 = parseExpression();
+					mustMatch(TokenType.SEMICOLON);
+					return new Statement.ExpressionStatement(expression2, false);
+				} else if (isRule) {
+					// TODO
+					throw new UnsupportedOperationException("Rule code not yet abstracted");
 				} else {
 					throw new RuntimeException("Statement not terminated by ';'");
 				}
@@ -106,15 +116,17 @@ public class Parser {
 		}
 	}
 
-	private Statement.Assignment parseAssignment() {
+	private Statement.Assignment parseAssignment(boolean expectSemicolon) {
 		Token name = getNextToken();
 		if (name.type != TokenType.NAME) {
 			throw new RuntimeException("Expected NAME, found " + name.type);
 		}
-		Expression leftSide = parseIndex(new Expression.VariableName(name.text));
+		Expression leftSide = parseIndex(new Expression.Symbol(name.text));
 		mustMatch(TokenType.EQUALS);
 		Expression rightSide = parseExpression();
-		mustMatch(TokenType.SEMICOLON);
+		if (expectSemicolon) {
+			mustMatch(TokenType.SEMICOLON);
+		}
 		return new Statement.Assignment(leftSide, rightSide);
 	}
 
@@ -243,7 +255,7 @@ public class Parser {
 					return expression;
 				}
 			case NAME:
-				var name = new Expression.VariableName(nextToken.text);
+				var name = new Expression.Symbol(nextToken.text);
 				if (peek().type == TokenType.BRACKET_LEFT) {
 					return parseIndex(name);
 				} else if (tryMatchToken(TokenType.PAREN_LEFT)) {
@@ -270,6 +282,10 @@ public class Parser {
 
 	private ArrayList<Expression> parseArgs() {
 		ArrayList<Expression> ret = new ArrayList<>();
+		if (tryMatchToken(TokenType.PAREN_RIGHT)) {
+			return ret;
+		}
+		ret.add(parseExpression());
 		while (tryMatchToken(TokenType.COMMA)) {
 			ret.add(parseExpression());
 		}
@@ -277,15 +293,31 @@ public class Parser {
 		return ret;
 	}
 
-	private Statement.ForLoop parseFor() {
+	private Statement parseFor() {
 		mustMatch(TokenType.PAREN_LEFT);
-		var setup = parseAssignment();
-		mustMatch(TokenType.SEMICOLON);
+		var setup = parseAssignment(true);
 		var conditional = parseExpression();
 		mustMatch(TokenType.SEMICOLON);
-		var increment = parseAssignment();
+		var increment = parseAssignment(false);
+		mustMatch(TokenType.PAREN_RIGHT);
 		var block = parseBlock();
-		return new Statement.ForLoop(block, setup, conditional, increment);
+		var blockStatements = new ArrayList<Statement>(Arrays.asList(block.statements));
+
+		// Desugar into a scoped while loop:
+		// ...
+		// {
+		//   setup
+		//   while (conditional) {
+		//     ...
+		//     increment
+		//   }
+		// }
+		// ...
+		blockStatements.add(increment);
+		return new Statement.BlockStatement(new Block(new Statement[]{
+			setup,
+			new Statement.WhileLoop(conditional, new Block(blockStatements))
+		}));
 	}
 
 	private Statement.WhileLoop parseWhile() {
@@ -294,7 +326,7 @@ public class Parser {
 		return new Statement.WhileLoop(condition, block);
 	}
 
-	private ArrayList<Statement> parseBlock() {
+	private Block parseBlock() {
 		mustMatch(TokenType.CURL_LEFT);
 		ArrayList<Statement> ret = new ArrayList<>();
 		while (!tryMatchToken(TokenType.CURL_RIGHT)) {
@@ -305,22 +337,20 @@ public class Parser {
 			ret.add(current);
 		}
 
-		return ret;
+		return new Block(ret);
 	}
 
 	private Statement.If parseIf() {
 		Expression condition = parseExpression();
-		ArrayList<Statement> mainBlock = parseBlock();
+		var mainBlock = parseBlock();
 		if (peek().type == TokenType.ELSE) {
 			advance();
 			ArrayList<Expression> ifConditions = new ArrayList<>();
-			ArrayList<ArrayList<Statement>> ifBlocks = new ArrayList<>();
+			ArrayList<Block> ifBlocks = new ArrayList<>();
 			ifConditions.add(condition);
 			ifBlocks.add(mainBlock);
 			while (tryMatchToken(TokenType.IF)) {
-				mustMatch(TokenType.PAREN_LEFT);
 				ifConditions.add(parseExpression());
-				mustMatch(TokenType.PAREN_RIGHT);
 				ifBlocks.add(parseBlock());
 				if (!tryMatchToken(TokenType.ELSE)) {
 					return new Statement.If(ifConditions, ifBlocks);

@@ -1,6 +1,7 @@
 package jmaker.parser;
 
 import java.util.ArrayList;
+import tests.TestUtil;
 
 public class Statement {
 
@@ -50,11 +51,11 @@ public class Statement {
 	}
 
 	public static class WhileLoop extends Statement {
-		public final ArrayList<Statement> block;
+		public final Block block;
 		public final Expression condition;
 
 		// While loop
-		public WhileLoop(Expression condition, ArrayList<Statement> block) {
+		public WhileLoop(Expression condition, Block block) {
 			this.block = block;
 			this.condition = condition;
 			if (block == null) {
@@ -64,88 +65,89 @@ public class Statement {
 				throw new RuntimeException("Condition cannot be null.");
 			}
 		}
-	}
 
-	public static class ForLoop extends Statement {
-		public final ArrayList<Statement> block;
-		public final Assignment setup;
-		public final Expression condition;
-		public final Assignment increment;
-
-		// For loop
-		public ForLoop(ArrayList<Statement> block, Assignment setup, Expression condition, Assignment increment) {
-			this.block = block;
-			this.setup = setup;
-			this.condition = condition;
-			this.increment = increment;
-			if (block == null) {
-				throw new RuntimeException("Block cannot be null.");
-			}
-			if (setup == null) {
-				throw new RuntimeException("Setup cannot be null in 'for' loop.");
-			}
-			if (condition == null) {
-				throw new RuntimeException("Condition cannot be null.");
-			}
-			if (increment == null) {
-				throw new RuntimeException("Increment cannot be null in 'for' loop.");
-			}
+		@Override
+		public String toString() {
+			return "{While, condition: " + condition + ", block: " + block + "}";
 		}
 	}
 
 	public static class If extends Statement {
-		public final ArrayList<Expression> conditionals;
-		public final ArrayList<ArrayList<Statement>> blocks;
-		public final ArrayList<Statement> elseBlock;
+		public final Expression[] conditionals;
+		public final Block[] blocks;
+		public final Block elseBlock;
 
-		public If(Expression conditional, ArrayList<Statement> block) {
+		public If(Expression conditional, Block block) {
 			assert (conditional != null);
 			assert (block != null);
-			conditionals = new ArrayList<>();
-			blocks = new ArrayList<>();
-			conditionals.add(conditional);
-			blocks.add(block);
+			conditionals = new Expression[]{
+				conditional
+			};
+			blocks = new Block[]{
+				block
+			};
 			elseBlock = null;
 		}
 
-		public If(ArrayList<Expression> conditionals, ArrayList<ArrayList<Statement>> blocks) {
-			assert (conditionals != null);
-			assert (blocks != null);
-			assert (conditionals.size() > 0);
-			assert (blocks.size() > 0);
-			assert (conditionals.size() == blocks.size());
-			this.conditionals = conditionals;
-			this.blocks = blocks;
-			elseBlock = null;
+		public If(ArrayList<Expression> conditionals, ArrayList<Block> blocks) {
+			this(conditionals.toArray(size->new Expression[size]), blocks.toArray(size->new Block[size]));
 		}
 
-		public If(ArrayList<Expression> conditionals, ArrayList<ArrayList<Statement>> blocks, ArrayList<Statement> elseBlock) {
+		public If(Expression[] conditionals, Block[] blocks) {
+			this(conditionals, blocks, null);
+		}
+
+		public If(ArrayList<Expression> conditionals, ArrayList<Block> blocks, Block elseBlock) {
+			this(conditionals.toArray(size->new Expression[size]), blocks.toArray(size->new Block[size]), elseBlock);
+		}
+
+		public If(Expression[] conditionals, Block[] blocks, Block elseBlock) {
 			assert (conditionals != null);
 			assert (blocks != null);
-			assert (elseBlock != null);
-			assert (conditionals.size() > 0);
-			assert (blocks.size() > 0);
-			assert (conditionals.size() == blocks.size());
+			assert (conditionals.length > 0);
+			assert (conditionals.length == blocks.length);
 			this.conditionals = conditionals;
 			this.blocks = blocks;
 			this.elseBlock = elseBlock;
 		}
+
+		@Override
+		public String toString() {
+			StringBuilder ret = new StringBuilder();
+			ret.append("{If, conditionals: ");
+			ret.append(TestUtil.arrayToString(conditionals));
+			ret.append(", blocks: ");
+			ret.append(TestUtil.arrayToString(blocks));
+			ret.append(", elseBlock: ");
+			ret.append(elseBlock);
+			ret.append("}");
+			return ret.toString();
+		}
 	}
 
 	public static class BlockStatement extends Statement {
-		public ArrayList<Statement> statements;
+		public final Block block;
 
-		public BlockStatement(ArrayList<Statement> statements) {
-			this.statements = statements;
+		public BlockStatement(Block block) {
+			this.block = block;
+		}
+
+		@Override
+		public String toString() {
+			return "{Block: " + block + "}";
 		}
 	}
 
 	public static class Rule extends Statement {
-		public ArrayList<Expression> targets;
-		public ArrayList<Expression> dependencies;
-		public ArrayList<Statement> block;
+		public final Expression[] targets;
+		public final Expression[] dependencies;
+		public final Block block;
 
-		public Rule(ArrayList<Expression> targets, ArrayList<Expression> dependencies, ArrayList<Statement> block) {
+		public Rule(ArrayList<Expression> targets, ArrayList<Expression> dependencies, Block block) {
+			this(targets.toArray(size->new Expression[size]), dependencies.toArray(size->new Expression[size]), block);
+		}
+
+		public Rule(Expression[] targets, Expression[] dependencies, Block block) {
 			this.targets = targets;
 			this.dependencies = dependencies;
 			this.block = block;
@@ -153,9 +155,22 @@ public class Statement {
 
 		@Override
 		public String toString() {
-			return "{Rule, targets: " + targets + ", deps: " + dependencies + ", block: " + block + "}";
+			StringBuilder ret = new StringBuilder();
+			ret.append("{Rule, targets: ");
+			ret.append(TestUtil.arrayToString(targets));
+			ret.append(", deps: ");
+			ret.append(TestUtil.arrayToString(dependencies));
+			ret.append(", block: ");
+			ret.append(block);
+			ret.append("}");
+			return ret.toString();
 		}
 	}
 
-	public static class Empty extends Statement {}
+	public static class Empty extends Statement {
+		@Override
+		public String toString() {
+			return "{EmptyStatement}";
+		}
+	}
 }

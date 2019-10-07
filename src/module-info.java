@@ -1,1 +1,2 @@
-module jmaker {}
+module jmaker {
+	requires org.junit.jupiter.api;}
