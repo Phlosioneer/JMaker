@@ -2,6 +2,10 @@ package jmaker.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import jmaker.interpreter.BooleanValue;
+import jmaker.interpreter.DoubleValue;
+import jmaker.interpreter.IntegerValue;
+import jmaker.interpreter.StringValue;
 
 public class Parser {
 	private final ArrayList<Token> tokens;
@@ -121,7 +125,7 @@ public class Parser {
 		if (name.type != TokenType.NAME) {
 			throw new RuntimeException("Expected NAME, found " + name.type);
 		}
-		Expression leftSide = parseIndex(new Expression.Symbol(name.text));
+		Expression.Symbol leftSide = new Expression.Symbol(name.text);
 		mustMatch(TokenType.EQUALS);
 		Expression rightSide = parseExpression();
 		if (expectSemicolon) {
@@ -234,15 +238,15 @@ public class Parser {
 		var nextToken = getNextToken();
 		switch (nextToken.type) {
 			case STRING:
-				return new Expression.StringLiteral(nextToken.text);
+				return new StringValue(nextToken.text);
 			case INT:
-				return new Expression.Number(Integer.parseInt(nextToken.text));
+				return new IntegerValue(Integer.parseInt(nextToken.text));
 			case DOUBLE:
-				return new Expression.Number(Double.parseDouble(nextToken.text));
+				return new DoubleValue(Double.parseDouble(nextToken.text));
 			case TRUE:
-				return new Expression.BooleanLiteral(true);
+				return new BooleanValue(true);
 			case FALSE:
-				return new Expression.BooleanLiteral(false);
+				return new BooleanValue(false);
 			case PAREN_LEFT:
 				var expression = parseExpression();
 				mustMatch(TokenType.PAREN_RIGHT);

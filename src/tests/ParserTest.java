@@ -2,10 +2,13 @@ package tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
+import jmaker.interpreter.BooleanValue;
+import jmaker.interpreter.DoubleValue;
+import jmaker.interpreter.IntegerValue;
+import jmaker.interpreter.StringValue;
 import jmaker.parser.BinaryOperator;
 import jmaker.parser.Block;
 import jmaker.parser.Expression;
-import jmaker.parser.Expression.Binary;
 import jmaker.parser.Lexer;
 import jmaker.parser.Parser;
 import jmaker.parser.Statement;
@@ -28,15 +31,15 @@ class ParserTest {
 					//
 					new Expression.Symbol("TEST"),
 					//
-					new Expression.Number(2)),
+					new IntegerValue(2)),
 			new Statement.Rule(
 					//
 					new Expression[]{
-						new Expression.StringLiteral("foo.class")
+						new StringValue("foo.class")
 					},
 					//
 					new Expression[]{
-						new Expression.StringLiteral("foo.java")
+						new StringValue("foo.java")
 					},
 					//
 					new Block(new Statement[]{
@@ -48,7 +51,7 @@ class ParserTest {
 												//
 												new Expression.Binary(
 														//
-														new Expression.StringLiteral("javac "),
+														new StringValue("javac "),
 														//
 														BinaryOperator.ADD,
 														//
@@ -56,11 +59,11 @@ class ParserTest {
 																//
 																new Expression.Symbol("deps"),
 																//
-																new Expression.Number(0))),
+																new IntegerValue(0))),
 												//
 												BinaryOperator.ADD,
 												//
-												new Expression.StringLiteral(" -o ")),
+												new StringValue(" -o ")),
 										//
 										BinaryOperator.ADD,
 										//
@@ -68,7 +71,7 @@ class ParserTest {
 												//
 												new Expression.Symbol("targets"),
 												//
-												new Expression.Number(0))),
+												new IntegerValue(0))),
 								//
 								true)
 					}))
@@ -89,20 +92,20 @@ class ParserTest {
 			new Statement.If(
 					//
 					new Expression[]{
-						new Expression.BooleanLiteral(true),
+						new BooleanValue(true),
 						new Expression.Binary(
 								//
 								new Expression.Binary(
 										//
-										new Expression.Number(6),
+										new IntegerValue(6),
 										//
 										BinaryOperator.ADD,
 										//
-										new Expression.Number(2)),
+										new IntegerValue(2)),
 								//
 								BinaryOperator.EQUAL,
 								//
-								new Expression.Number(8))
+								new IntegerValue(8))
 					},
 					//
 					new Block[]{
@@ -111,14 +114,14 @@ class ParserTest {
 									//
 									new Expression.Symbol("var1"),
 									//
-									new Expression.StringLiteral("hello"))
+									new StringValue("hello"))
 						}),
 						new Block(new Statement[]{
 							new Statement.Assignment(
 									//
 									new Expression.Symbol("var1"),
 									//
-									new Expression.Number(253))
+									new IntegerValue(253))
 						})
 					},
 					//
@@ -126,7 +129,7 @@ class ParserTest {
 						new Statement.If(
 								//
 								new Expression[]{
-									new Expression.BooleanLiteral(false)
+									new BooleanValue(false)
 								},
 								//
 								new Block[]{
@@ -137,11 +140,11 @@ class ParserTest {
 												//
 												new Expression.Binary(
 														//
-														new Expression.Number(3.14),
+														new DoubleValue(3.14),
 														//
 														BinaryOperator.ADD,
 														//
-														new Expression.Number(2)))
+														new IntegerValue(2)))
 									})
 								},
 								//
@@ -156,9 +159,9 @@ class ParserTest {
 															//
 															new Expression.Symbol("env"),
 															//
-															new Expression.StringLiteral("testArray")),
+															new StringValue("testArray")),
 													//
-													new Expression.Number(0)))
+													new IntegerValue(0)))
 								}))
 					})),
 			// Desugared for loop
@@ -167,7 +170,7 @@ class ParserTest {
 						//
 						new Expression.Symbol("i"),
 						//
-						new Expression.Number(0)),
+						new IntegerValue(0)),
 				new Statement.WhileLoop(
 						//
 						new Expression.Binary(
@@ -176,7 +179,7 @@ class ParserTest {
 								//
 								BinaryOperator.LESS,
 								//
-								new Expression.Number(20)),
+								new IntegerValue(20)),
 						//
 						new Block(new Statement[]{
 							new Statement.Rule(
@@ -186,7 +189,7 @@ class ParserTest {
 												//
 												new Expression.Binary(
 														//
-														new Expression.StringLiteral("file"),
+														new StringValue("file"),
 														//
 														BinaryOperator.ADD,
 														//
@@ -194,7 +197,7 @@ class ParserTest {
 												//
 												BinaryOperator.ADD,
 												//
-												new Expression.StringLiteral(".txt"))
+												new StringValue(".txt"))
 									},
 									//
 									new Expression[]{},
@@ -208,7 +211,7 @@ class ParserTest {
 																//
 																new Expression.Binary(
 																		//
-																		new Expression.StringLiteral("cat "),
+																		new StringValue("cat "),
 																		//
 																		BinaryOperator.ADD,
 																		//
@@ -216,7 +219,7 @@ class ParserTest {
 																//
 																BinaryOperator.ADD,
 																//
-																new Expression.StringLiteral(" > ")),
+																new StringValue(" > ")),
 														//
 														BinaryOperator.ADD,
 														//
@@ -234,7 +237,7 @@ class ParserTest {
 											//
 											BinaryOperator.ADD,
 											//
-											new Expression.Number(1)))
+											new IntegerValue(1)))
 						}))
 			})),
 			new Statement.WhileLoop(
@@ -245,7 +248,7 @@ class ParserTest {
 							//
 							BinaryOperator.GREATER_EQUAL,
 							//
-							new Expression.Number(2)),
+							new IntegerValue(2)),
 					//
 					new Block(new Statement[]{
 						new Statement.ExpressionStatement(
@@ -255,7 +258,7 @@ class ParserTest {
 										new Expression.Symbol("println"),
 										//
 										new Expression[]{
-											new Expression.StringLiteral("Hello World"),
+											new StringValue("Hello World"),
 											new Expression.Symbol("var1")
 										}),
 								//
@@ -264,7 +267,7 @@ class ParserTest {
 								//
 								new Expression.Symbol("var1"),
 								//
-								new Expression.Number(0))
+								new IntegerValue(0))
 					}))
 		});
 

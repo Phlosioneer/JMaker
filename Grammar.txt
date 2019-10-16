@@ -8,7 +8,7 @@ file = ( statement )*
 statement = assignment | if | while | for | rule | ( ">" )? expression ";"
 
 # Variables
-assignment = name ( "[" expression "]" )* "=" expression ";"
+assignment = name "=" expression ";"
 
 # Control structures.
 if = "if" expression block ( "else" "if" expression block )* ( "else" block )?

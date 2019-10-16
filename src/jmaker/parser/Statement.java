@@ -1,6 +1,7 @@
 package jmaker.parser;
 
 import java.util.ArrayList;
+import jmaker.parser.Expression.Symbol;
 import tests.TestUtil;
 
 public class Statement {
@@ -36,10 +37,10 @@ public class Statement {
 	public static class Assignment extends Statement {
 		// The left side isn't an arbitrary expression - it's a name followed by
 		// any number of index expressions.
-		public final Expression leftSide;
+		public final Symbol leftSide;
 		public final Expression rightSide;
 
-		public Assignment(Expression leftSide, Expression rightSide) {
+		public Assignment(Symbol leftSide, Expression rightSide) {
 			this.leftSide = leftSide;
 			this.rightSide = rightSide;
 		}

@@ -3,16 +3,8 @@ package jmaker.parser;
 import java.util.ArrayList;
 import tests.TestUtil;
 
-public class Expression {
-
-	protected Expression() {}
-
-	@Override
-	public String toString() {
-		throw new UnsupportedOperationException(getClass().getName() + " MUST implement toString");
-	}
-
-	public static class Binary extends Expression {
+public interface Expression {
+	public static class Binary implements Expression {
 		public final Expression left;
 		public final BinaryOperator operator;
 		public final Expression right;
@@ -29,7 +21,7 @@ public class Expression {
 		}
 	}
 
-	public static class Unary extends Expression {
+	public static class Unary implements Expression {
 		public final Expression inner;
 		public final UnaryOperator operator;
 
@@ -44,7 +36,7 @@ public class Expression {
 		}
 	}
 
-	public static class Index extends Expression {
+	public static class Index implements Expression {
 		public final Expression variable;
 		public final Expression indexExpression;
 
@@ -59,7 +51,7 @@ public class Expression {
 		}
 	}
 
-	public static class FunctionCall extends Expression {
+	public static class FunctionCall implements Expression {
 		public final Expression functionName;
 		public final Expression[] args;
 
@@ -84,61 +76,7 @@ public class Expression {
 		}
 	}
 
-	public static class Number extends Expression {
-		public final boolean isInteger;
-		public final int intValue;
-		public final double doubleValue;
-
-		public Number(int value) {
-			isInteger = true;
-			intValue = value;
-			doubleValue = 0;
-		}
-
-		public Number(double value) {
-			isInteger = false;
-			intValue = 0;
-			doubleValue = value;
-		}
-
-		@Override
-		public String toString() {
-			if (isInteger) {
-				return "{Int, " + intValue + "}";
-			} else {
-				return "{Double, " + doubleValue + "}";
-			}
-		}
-	}
-
-	public static class StringLiteral extends Expression {
-		public final String value;
-
-		public StringLiteral(String value) {
-			// TODO: Escape character processing
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return "{\"" + value + "\"}";
-		}
-	}
-
-	public static class BooleanLiteral extends Expression {
-		public final boolean value;
-
-		public BooleanLiteral(boolean value) {
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return "{" + value + "}";
-		}
-	}
-
-	public static class Symbol extends Expression {
+	public static class Symbol implements Expression {
 		public final String name;
 
 		public Symbol(String name) {
