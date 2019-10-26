@@ -1,0 +1,50 @@
+[
+	"All this info is taken from the GNU Make sourcecode. This document is not intended",
+	"to be used at runtime (at least at first); it's just the best way to record the",
+	"things I've learned from reading GNU Make code for hours.",
+	{
+		"name": "cmd",
+		"baseBinary": "cmd.exe",
+		"expectedDirs": [
+			"C:\\Windows\\System32"
+		],
+		"specialChars": {
+			"normal": "|&<>",
+			"singleQuote": "",
+			"doubleQuote": "*?"
+		},
+		"rawNewlineAllowedIn": ["singleQuote"],
+		"batchFileExtension": ".bat",
+		"commands": [
+			"assoc", "break", "call", "cd", "chcp", "chdir", "cls", "color", "copy",
+			"ctty", "date", "del", "dir", "echo", "echo.", "endlocal", "erase",
+			"exit", "for", "ftype", "goto", "if", "if", "md", "mkdir", "move",
+			"path", "pause", "prompt", "rd", "rem", "ren", "rename", "rmdir",
+			"set", "setlocal", "shift", "time", "title", "type", "ver", "verify",
+			"vol", ":"
+		],
+		"batchFlags": []
+	},
+	{
+		"name": "sh",
+		"baseBinary": "sh",
+		"expectedDirs": [
+			"/bin/bash"
+		],
+		"specialChars": {
+			"normal": "#;\"*?[]&|<>(){}$`^=",
+			"singleQuote": "",
+			"doubleQuote": "\\$"
+		},
+		"rawNewlineAllowedIn": ["singleQuote"],
+		"batchFileExtension": ".sh",
+		"commands": [
+			"cd", "eval", "exec", "exit", "login", "logout", "set", "umask", "wait",
+			"while", "for", "case", "if", ":", ".", "break", "continue", "export",
+			"read", "readonly", "shift", "times", "trap", "switch", "test", "command",
+			"echo"
+		],
+		"batchFlags": ["-e"],
+		"singleLineFlags": ["-e", "-c"]
+	}
+]

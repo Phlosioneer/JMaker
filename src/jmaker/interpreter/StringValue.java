@@ -50,4 +50,19 @@ public class StringValue implements ExpressionValue, Expression {
 	public String castToString() {
 		return value;
 	}
+
+	@Override
+	public int hashCode() {
+		return value.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof StringValue)) {
+			return false;
+		}
+		StringValue other = (StringValue) obj;
+
+		return value.equals(other.value);
+	}
 }

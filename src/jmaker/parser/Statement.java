@@ -152,6 +152,7 @@ public class Statement {
 			this.targets = targets;
 			this.dependencies = dependencies;
 			this.block = block;
+			assert (targets.length > 0);
 		}
 
 		@Override

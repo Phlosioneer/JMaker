@@ -131,7 +131,7 @@ public class Lexer {
 		if (Character.isDigit(c)) {
 			return parseNumber(c);
 		}
-		throw new RuntimeException("Unrecognized character: " + c + " (" + (int) c + ")");
+		return new Token(c, TokenType.UNKNOWN);
 	}
 
 	private Token parseSymbolOrKeyword(char firstChar) {

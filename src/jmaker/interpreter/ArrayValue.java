@@ -57,4 +57,19 @@ public class ArrayValue implements ExpressionValue {
 		builder.append(']');
 		return builder.toString();
 	}
+
+	@Override
+	public int hashCode() {
+		return elements.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof ArrayValue)) {
+			return false;
+		}
+
+		ArrayValue other = (ArrayValue) obj;
+		return elements.equals(other.elements);
+	}
 }

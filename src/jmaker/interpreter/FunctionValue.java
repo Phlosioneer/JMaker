@@ -1,11 +1,13 @@
 package jmaker.interpreter;
 
-public class FunctionValue implements ExpressionValue {
+public abstract class FunctionValue implements ExpressionValue {
 	public final String symbolName;
 
 	public FunctionValue(String symbolName) {
 		this.symbolName = symbolName;
 	}
+
+	public abstract ExpressionValue call(ExpressionValue[] args);
 
 	@Override
 	public DataType getType() {

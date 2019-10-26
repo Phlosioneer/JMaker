@@ -33,4 +33,19 @@ public class IntegerValue implements ExpressionValue, Expression {
 	public String castToString() {
 		return Integer.toString(value);
 	}
+
+	@Override
+	public int hashCode() {
+		return Integer.hashCode(value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof IntegerValue)) {
+			return false;
+		}
+		IntegerValue other = (IntegerValue) obj;
+
+		return value == other.value;
+	}
 }

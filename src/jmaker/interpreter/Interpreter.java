@@ -21,6 +21,8 @@ import jmaker.parser.Statement.WhileLoop;
 public class Interpreter {
 	Block script;
 	Memory memory;
+	ArrayList<String> commandQueue;
+	ArrayList<RuleValue> allRules;
 
 	public Interpreter(Block script) {
 		this.script = script;
@@ -43,7 +45,7 @@ public class Interpreter {
 					if (command.getType() != DataType.String) {
 						throw new RuntimeException("Command expressions must return a string.");
 					}
-					runCommand(command.asString());
+					pushCommand(command.asString());
 				} else {
 					runExpression(expression.expression);
 				}
@@ -65,12 +67,44 @@ public class Interpreter {
 	}
 
 	private void createRule(Rule statement) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("createRule of Interpreter not yet implemented.");
+		String[] resolvedTargets = new String[statement.targets.length];
+		String[] resolvedDependencies = new String[statement.dependencies.length];
+
+		for (int i = 0; i < statement.targets.length; i++) {
+			var targetExpression = statement.targets[i];
+			var targetValue = runExpression(targetExpression);
+			if (targetValue.getType() != DataType.String) {
+				throw new RuntimeException("Rule targets must be strings.");
+			}
+			resolvedTargets[i] = targetValue.asString();
+		}
+
+		for (int i = 0; i < statement.dependencies.length; i++) {
+			var depExpression = statement.dependencies[i];
+			var depValue = runExpression(depExpression);
+			if (depValue.getType() != DataType.String) {
+				throw new RuntimeException("Rule dependencies must be strings.");
+			}
+			resolvedDependencies[i] = depValue.asString();
+		}
+
+		if (commandQueue != null) {
+			throw new RuntimeException("Cannot nest Rules.");
+		}
+		commandQueue = new ArrayList<>();
+
+		runBlock(statement.block);
+
+		var commandsAsRawArray = commandQueue.toArray(size->new String[size]);
+		allRules.add(new RuleValue(resolvedTargets, resolvedDependencies, commandsAsRawArray));
+		commandQueue = null;
 	}
 
-	private void runCommand(String command) {
-		System.out.println("Command Executed: [" + command + "]");
+	private void pushCommand(String command) {
+		if (commandQueue == null) {
+			throw new RuntimeException("Cannot use command statement outside of a Rule body.");
+		}
+		commandQueue.add(command);
 	}
 
 	private void runIf(If statement) {
@@ -108,7 +142,7 @@ public class Interpreter {
 		}
 	}
 
-	private ExpressionValue runExpression(Expression expression) {
+	public ExpressionValue runExpression(Expression expression) {
 		// Literal values.
 		if (expression instanceof ExpressionValue) {
 			return (ExpressionValue) expression;
@@ -117,7 +151,11 @@ public class Interpreter {
 		// Variables and arrays.
 		if (expression instanceof Symbol) {
 			var symbol = (Symbol) expression;
-			return memory.get(symbol.name);
+			var ret = memory.get(symbol.name);
+			if (ret == null) {
+				throw new RuntimeException("No function or variable named " + ret + " was found in the current scope.");
+			}
+			return ret;
 		}
 		if (expression instanceof Index) {
 			var castExpression = (Index) expression;
@@ -154,7 +192,17 @@ public class Interpreter {
 			return runBinaryOp(left, right, castExpression.operator);
 		}
 		if (expression instanceof FunctionCall) {
-			// TODO: ???
+			var functionCall = (FunctionCall) expression;
+			var function = runExpression(functionCall.functionName);
+			if (function.getType() != DataType.Function) {
+				throw new RuntimeException("Expected function, found " + function.getType());
+			}
+			var args = new ExpressionValue[functionCall.args.length];
+			for (int i = 0; i < args.length; i++) {
+				var arg = functionCall.args[i];
+				args[i] = runExpression(arg);
+			}
+			return ((FunctionValue) function).call(args);
 		}
 		throw new RuntimeException("Unrecognized expression type: " + expression.getClass().getName());
 	}

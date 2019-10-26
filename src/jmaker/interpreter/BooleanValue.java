@@ -27,4 +27,18 @@ public class BooleanValue implements ExpressionValue, Expression {
 			return "false";
 		}
 	}
+
+	@Override
+	public int hashCode() {
+		return Boolean.hashCode(value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof BooleanValue)) {
+			return false;
+		}
+		BooleanValue other = (BooleanValue) obj;
+		return value == other.value;
+	};
 }

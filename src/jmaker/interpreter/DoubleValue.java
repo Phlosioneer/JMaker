@@ -28,4 +28,19 @@ public class DoubleValue implements Expression, ExpressionValue {
 	public String castToString() {
 		return Double.toString(value);
 	}
+
+	@Override
+	public int hashCode() {
+		return Double.hashCode(value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof DoubleValue)) {
+			return false;
+		}
+		DoubleValue other = (DoubleValue) obj;
+
+		return value == other.value;
+	}
 }

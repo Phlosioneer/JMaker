@@ -22,5 +22,5 @@ public enum TokenType {
 	// A variable or function name
 	NAME,
 
-	EOF
+	UNKNOWN, EOF
 }

@@ -54,4 +54,19 @@ public class DictionaryValue implements ExpressionValue {
 		builder.append('}');
 		return builder.toString();
 	}
+
+	@Override
+	public int hashCode() {
+		return elements.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof DictionaryValue)) {
+			return false;
+		}
+
+		DictionaryValue other = (DictionaryValue) obj;
+		return elements.equals(other.elements);
+	}
 }
