@@ -59,6 +59,18 @@ public class Lexer {
 				return new Token(c, TokenType.CURL_LEFT);
 			case '}':
 				return new Token(c, TokenType.CURL_RIGHT);
+			case '&':
+				if (peek() == '&') {
+					getNextChar();
+					return new Token("&&", TokenType.DOUBLE_AND);
+				}
+				break;
+			case '|':
+				if (peek() == '|') {
+					getNextChar();
+					return new Token("||", TokenType.DOUBLE_OR);
+				}
+				break;
 			case '<':
 				if (peek() == '=') {
 					getNextChar();
@@ -69,21 +81,21 @@ public class Lexer {
 			case '>':
 				if (peek() == '=') {
 					getNextChar();
-					return new Token(c, TokenType.GREATER_EQUAL);
+					return new Token(">=", TokenType.GREATER_EQUAL);
 				} else {
 					return new Token(c, TokenType.ANGLE_RIGHT);
 				}
 			case '=':
 				if (peek() == '=') {
 					getNextChar();
-					return new Token(c, TokenType.DOUBLE_EQUAL);
+					return new Token("==", TokenType.DOUBLE_EQUAL);
 				} else {
 					return new Token(c, TokenType.EQUALS);
 				}
 			case '!':
 				if (peek() == '=') {
 					getNextChar();
-					return new Token(c, TokenType.BANG_EQUAL);
+					return new Token("!=", TokenType.BANG_EQUAL);
 				} else {
 					return new Token(c, TokenType.BANG);
 				}
@@ -104,6 +116,7 @@ public class Lexer {
 					while (true) {
 						c = getNextChar();
 						if (c == '*' && peek() == '/') {
+							getNextChar();
 							break;
 						}
 						if (c == '\0') {
@@ -131,7 +144,7 @@ public class Lexer {
 		if (Character.isDigit(c)) {
 			return parseNumber(c);
 		}
-		return new Token(c, TokenType.UNKNOWN);
+		throw new RuntimeException("Unrecognized character '" + c + "'");
 	}
 
 	private Token parseSymbolOrKeyword(char firstChar) {
@@ -197,14 +210,14 @@ public class Lexer {
 		StringBuilder ret = new StringBuilder();
 		while (true) {
 			char c = getNextChar();
-			if (c == '"' || c == '\0') {
+			if (c == '"') {
 				break;
-			}
-			if (c == '\\') {
+			} else if (c == '\0') {
+				throw new RuntimeException("Found end of file while inside string");
+			} else if (c == '\\') {
 				c = getNextChar();
 				if (c == '\0') {
-					ret.append('\\');
-					break;
+					throw new RuntimeException("Found end of file while inside string");
 				}
 				switch (c) {
 					case '\\':
@@ -220,6 +233,9 @@ public class Lexer {
 					case 't':
 					case '\t':
 						ret.append('\t');
+						break;
+					case '"':
+						ret.append('"');
 						break;
 					default:
 						throw new RuntimeException("Unrecognized escape code: \\" + c);

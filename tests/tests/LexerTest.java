@@ -2,6 +2,8 @@ package tests;
 
 import static jmaker.parser.TokenType.ANGLE_LEFT;
 import static jmaker.parser.TokenType.ANGLE_RIGHT;
+import static jmaker.parser.TokenType.BANG;
+import static jmaker.parser.TokenType.BANG_EQUAL;
 import static jmaker.parser.TokenType.BRACKET_LEFT;
 import static jmaker.parser.TokenType.BRACKET_RIGHT;
 import static jmaker.parser.TokenType.COLON;
@@ -9,7 +11,9 @@ import static jmaker.parser.TokenType.COMMA;
 import static jmaker.parser.TokenType.CURL_LEFT;
 import static jmaker.parser.TokenType.CURL_RIGHT;
 import static jmaker.parser.TokenType.DOUBLE;
+import static jmaker.parser.TokenType.DOUBLE_AND;
 import static jmaker.parser.TokenType.DOUBLE_EQUAL;
+import static jmaker.parser.TokenType.DOUBLE_OR;
 import static jmaker.parser.TokenType.ELSE;
 import static jmaker.parser.TokenType.EOF;
 import static jmaker.parser.TokenType.EQUALS;
@@ -18,15 +22,20 @@ import static jmaker.parser.TokenType.FOR;
 import static jmaker.parser.TokenType.GREATER_EQUAL;
 import static jmaker.parser.TokenType.IF;
 import static jmaker.parser.TokenType.INT;
+import static jmaker.parser.TokenType.LESS_EQUAL;
+import static jmaker.parser.TokenType.MINUS;
 import static jmaker.parser.TokenType.NAME;
 import static jmaker.parser.TokenType.PAREN_LEFT;
 import static jmaker.parser.TokenType.PAREN_RIGHT;
 import static jmaker.parser.TokenType.PLUS;
 import static jmaker.parser.TokenType.SEMICOLON;
+import static jmaker.parser.TokenType.SLASH;
+import static jmaker.parser.TokenType.STAR;
 import static jmaker.parser.TokenType.STRING;
 import static jmaker.parser.TokenType.TRUE;
 import static jmaker.parser.TokenType.WHILE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import jmaker.parser.Lexer;
 import jmaker.parser.TokenType;
@@ -141,5 +150,56 @@ class LexerTest {
 		for (int i = 0; i < expectedTokens.length; i++) {
 			assertEquals(expectedTokens[i], output.get(i).type);
 		}
+	}
+
+	@Test
+	void testFile3() {
+		final var expectedTokens = new TokenType[]{
+			// 1
+			NAME, MINUS, NAME, DOUBLE_EQUAL, INT, SEMICOLON,
+			// 9
+			IF, PAREN_LEFT, BANG, PAREN_LEFT, STRING, BANG_EQUAL, STRING, PAREN_RIGHT, PAREN_RIGHT, CURL_LEFT,
+			// 10
+			NAME, EQUALS, BRACKET_LEFT, STRING, COMMA, STRING, COMMA, STRING, COMMA, STRING, COMMA,
+			// 11
+			STRING, COMMA, STRING, COMMA, STRING, BRACKET_RIGHT, SEMICOLON,
+			// 12
+			CURL_RIGHT,
+			// 14
+			NAME, EQUALS, INT, STAR, INT, PLUS, INT, SLASH, MINUS, INT, MINUS,
+			INT, SEMICOLON,
+
+			// 15
+			NAME, EQUALS, PAREN_LEFT, INT, ANGLE_LEFT, INT, PAREN_RIGHT, DOUBLE_AND, NAME,
+			ANGLE_RIGHT, NAME, DOUBLE_AND, PAREN_LEFT, NAME, LESS_EQUAL, NAME, DOUBLE_OR,
+			PAREN_LEFT, DOUBLE, GREATER_EQUAL, NAME, PAREN_RIGHT, DOUBLE_AND, BANG, BANG,
+			TRUE, PAREN_RIGHT, SEMICOLON,
+
+			EOF
+		};
+
+		var input = TestUtil.readFile("jmakerTest3.txt");
+		var lexer = new Lexer(input);
+		var output = lexer.scanAll();
+		assertEquals(expectedTokens.length, output.size());
+
+		for (int i = 0; i < expectedTokens.length; i++) {
+			assertEquals(expectedTokens[i], output.get(i).type);
+		}
+	}
+
+	@Test
+	void testBadSymbols() {
+		assertThrows(RuntimeException.class, ()->new Lexer("true & false").scanAll());
+		assertThrows(RuntimeException.class, ()->new Lexer("true | false").scanAll());
+		assertThrows(RuntimeException.class, ()->new Lexer("^").scanAll());
+	}
+
+	@Test
+	void testBadStrings() {
+		assertThrows(RuntimeException.class, ()->new Lexer("\"end of file terminated").scanAll());
+		assertThrows(RuntimeException.class, ()->new Lexer("\"bad escape:\\y\"").scanAll());
+		assertThrows(RuntimeException.class, ()->new Lexer("\"raw newline\nin string\"").scanAll());
+		assertThrows(RuntimeException.class, ()->new Lexer("\"end of file escaped \\").scanAll());
 	}
 }

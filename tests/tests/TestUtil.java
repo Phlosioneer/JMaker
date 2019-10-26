@@ -9,8 +9,13 @@ public abstract class TestUtil {
 		var stream = TestUtil.class.getResourceAsStream(filename);
 		var reader = new BufferedReader(new InputStreamReader(stream));
 		var buffer = new StringBuilder();
-		reader.lines().forEach(buffer::append);
-		return buffer.toString();
+		reader.lines().forEach(line->buffer.append(line + '\n'));
+		var ret = buffer.toString();
+		// Remove last newline.
+		if (ret.length() == 0) {
+			return "";
+		}
+		return ret.substring(0, ret.length() - 1);
 	}
 
 	public static <T> String arrayToString(T[] array) {
