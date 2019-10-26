@@ -82,7 +82,6 @@ class ParserTest {
 
 	@Test
 	void testFile2() {
-		System.out.println("Test2-------");
 		var input = TestUtil.readFile("jmakerTest2.txt");
 		var lexer = new Lexer(input);
 		var parser = new Parser(lexer.scanAll());
