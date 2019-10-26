@@ -21,7 +21,7 @@ class ParserTest {
 
 	@Test
 	void testFile1() {
-		var input = TestUtil.readFile("jmakerTest1.txt");
+		var input = TestUtil.readFile("parserTest1.txt");
 		var lexer = new Lexer(input);
 		var parser = new Parser(lexer.scanAll());
 		var output = parser.parseFile();
@@ -82,7 +82,7 @@ class ParserTest {
 
 	@Test
 	void testFile2() {
-		var input = TestUtil.readFile("jmakerTest2.txt");
+		var input = TestUtil.readFile("parserTest2.txt");
 		var lexer = new Lexer(input);
 		var parser = new Parser(lexer.scanAll());
 		var output = parser.parseFile();

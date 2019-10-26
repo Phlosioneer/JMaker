@@ -48,7 +48,7 @@ class LexerTest {
 
 	@Test
 	void testFile1() {
-		var input = TestUtil.readFile("jmakerTest1.txt");
+		var input = TestUtil.readFile("lexerTest1.txt");
 		var lexer = new Lexer(input);
 		var output = lexer.scanAll();
 		assertEquals(25, output.size());
@@ -142,7 +142,7 @@ class LexerTest {
 			CURL_RIGHT, EOF
 		};
 
-		var input = TestUtil.readFile("jmakerTest2.txt");
+		var input = TestUtil.readFile("lexerTest2.txt");
 		var lexer = new Lexer(input);
 		var output = lexer.scanAll();
 		assertEquals(expectedTokens.length, output.size());
@@ -178,7 +178,7 @@ class LexerTest {
 			EOF
 		};
 
-		var input = TestUtil.readFile("jmakerTest3.txt");
+		var input = TestUtil.readFile("lexerTest3.txt");
 		var lexer = new Lexer(input);
 		var output = lexer.scanAll();
 		assertEquals(expectedTokens.length, output.size());
