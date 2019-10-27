@@ -96,7 +96,7 @@ public class TypeFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		return new IntegerValue(Integer.parseInt(arg.asString()));
+		return new IntegerValue(Integer.parseInt(arg.toString()));
 	}
 
 	public static ExpressionValue parseDouble(ExpressionValue[] args) {
@@ -110,7 +110,7 @@ public class TypeFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		return new DoubleValue(Double.parseDouble(arg.asString()));
+		return new DoubleValue(Double.parseDouble(arg.toString()));
 	}
 
 	public static ExpressionValue callFunction(ExpressionValue[] args) {

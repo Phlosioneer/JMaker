@@ -44,7 +44,7 @@ public class StringFunctions {
 
 		// This function only changes ASCII characters. English == Ascii, at least for
 		// upper/lower case stuff.
-		return new StringValue(original.asString().toLowerCase(Locale.ENGLISH));
+		return new StringValue(original.toString().toLowerCase(Locale.ENGLISH));
 	}
 
 	public static ExpressionValue toUpper(ExpressionValue[] args) {
@@ -59,7 +59,7 @@ public class StringFunctions {
 
 		// This function only changes ASCII characters. English == Ascii, at least for
 		// upper/lower case stuff.
-		return new StringValue(original.asString().toUpperCase(Locale.ENGLISH));
+		return new StringValue(original.toString().toUpperCase(Locale.ENGLISH));
 	}
 
 	public static ExpressionValue isLower(ExpressionValue[] args) {
@@ -72,7 +72,7 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		for (char c : original.asString().toCharArray()) {
+		for (char c : original.toString().toCharArray()) {
 			if (Character.isUpperCase(c)) {
 				return new BooleanValue(false);
 			}
@@ -90,7 +90,7 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		for (char c : original.asString().toCharArray()) {
+		for (char c : original.toString().toCharArray()) {
 			if (Character.isLowerCase(c)) {
 				return new BooleanValue(false);
 			}
@@ -108,7 +108,7 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		for (char c : original.asString().toCharArray()) {
+		for (char c : original.toString().toCharArray()) {
 			if (!Character.isAlphabetic(c)) {
 				return new BooleanValue(false);
 			}
@@ -126,7 +126,7 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		for (char c : original.asString().toCharArray()) {
+		for (char c : original.toString().toCharArray()) {
 			if (!Character.isDigit(c)) {
 				return new BooleanValue(false);
 			}
@@ -144,7 +144,7 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		for (char c : original.asString().toCharArray()) {
+		for (char c : original.toString().toCharArray()) {
 			if (!Character.isWhitespace(c)) {
 				return new BooleanValue(false);
 			}
@@ -162,8 +162,8 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		for (char c : original.asString().toCharArray()) {
-			int codePoint = (int) c;
+		for (char c : original.toString().toCharArray()) {
+			int codePoint = c;
 			int unicodePart = codePoint >> 7;
 
 			if (unicodePart != 0) {
@@ -183,7 +183,7 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		return new StringValue(original.asString().trim());
+		return new StringValue(original.toString().trim());
 	}
 
 	public static ExpressionValue replaceRange(ExpressionValue[] args) {
@@ -203,8 +203,8 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var originalString = original.asString();
-		var replacementString = replacement.asString();
+		var originalString = original.toString();
+		var replacementString = replacement.toString();
 		var startIndexInt = startIndex.asInteger();
 		var endIndexInt = endIndex.asInteger();
 
@@ -238,9 +238,9 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var originalString = original.asString();
-		var patternString = pattern.asString();
-		var replacementString = replacement.asString();
+		var originalString = original.toString();
+		var patternString = pattern.toString();
+		var replacementString = replacement.toString();
 
 		var newString = originalString.replaceFirst(patternString, replacementString);
 
@@ -260,9 +260,9 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var originalString = original.asString();
-		var patternString = pattern.asString();
-		var replacementString = replacement.asString();
+		var originalString = original.toString();
+		var patternString = pattern.toString();
+		var replacementString = replacement.toString();
 
 		var newString = originalString.replaceAll(patternString, replacementString);
 
@@ -281,8 +281,8 @@ public class StringFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var originalString = original.asString();
-		var patternString = pattern.asString();
+		var originalString = original.toString();
+		var patternString = pattern.toString();
 
 		var splitStrings = originalString.split(patternString);
 		var convertedArray = new ExpressionValue[splitStrings.length];

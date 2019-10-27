@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import jmaker.parser.Expression.Symbol;
-import tests.TestUtil;
 
 public class Statement {
 
@@ -22,17 +21,6 @@ public class Statement {
 		public ExpressionStatement(Expression expression, boolean isCommand) {
 			this.expression = expression;
 			this.isCommand = isCommand;
-		}
-
-		@Override
-		public String toString() {
-			String commandString;
-			if (isCommand) {
-				commandString = "command";
-			} else {
-				commandString = "normal";
-			}
-			return "{ExpressionStatement, " + commandString + ", " + expression + "}";
 		}
 
 		@Override
@@ -62,11 +50,6 @@ public class Statement {
 		public Assignment(Symbol leftSide, Expression rightSide) {
 			this.leftSide = leftSide;
 			this.rightSide = rightSide;
-		}
-
-		@Override
-		public String toString() {
-			return "{Assignment, left: " + leftSide + ", right:" + rightSide + "}";
 		}
 
 		@Override
@@ -101,11 +84,6 @@ public class Statement {
 			if (condition == null) {
 				throw new RuntimeException("Condition cannot be null.");
 			}
-		}
-
-		@Override
-		public String toString() {
-			return "{While, condition: " + condition + ", block: " + block + "}";
 		}
 
 		@Override
@@ -166,19 +144,6 @@ public class Statement {
 		}
 
 		@Override
-		public String toString() {
-			StringBuilder ret = new StringBuilder();
-			ret.append("{If, conditionals: ");
-			ret.append(TestUtil.arrayToString(conditionals));
-			ret.append(", blocks: ");
-			ret.append(TestUtil.arrayToString(blocks));
-			ret.append(", elseBlock: ");
-			ret.append(elseBlock);
-			ret.append("}");
-			return ret.toString();
-		}
-
-		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
@@ -206,11 +171,6 @@ public class Statement {
 
 		public BlockStatement(Block block) {
 			this.block = block;
-		}
-
-		@Override
-		public String toString() {
-			return "{Block: " + block + "}";
 		}
 
 		@Override
@@ -248,19 +208,6 @@ public class Statement {
 		}
 
 		@Override
-		public String toString() {
-			StringBuilder ret = new StringBuilder();
-			ret.append("{Rule, targets: ");
-			ret.append(TestUtil.arrayToString(targets));
-			ret.append(", deps: ");
-			ret.append(TestUtil.arrayToString(dependencies));
-			ret.append(", block: ");
-			ret.append(block);
-			ret.append("}");
-			return ret.toString();
-		}
-
-		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
@@ -284,11 +231,6 @@ public class Statement {
 	}
 
 	public static class Empty extends Statement {
-		@Override
-		public String toString() {
-			return "{EmptyStatement}";
-		}
-
 		@Override
 		public int hashCode() {
 			return 0;

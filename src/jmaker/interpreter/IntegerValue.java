@@ -27,11 +27,6 @@ public class IntegerValue implements ExpressionValue, Expression {
 
 	@Override
 	public String toString() {
-		return "{Integer, " + value + "}";
-	}
-
-	@Override
-	public String castToString() {
 		return Integer.toString(value);
 	}
 
@@ -51,5 +46,4 @@ public class IntegerValue implements ExpressionValue, Expression {
 		IntegerValue other = (IntegerValue) obj;
 		return value == other.value;
 	}
-
 }

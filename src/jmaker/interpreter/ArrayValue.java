@@ -35,17 +35,17 @@ public class ArrayValue implements ExpressionValue {
 	}
 
 	@Override
-	public String castToString() {
+	public String toString() {
 		var builder = new StringBuilder();
 		builder.append('[');
 
 		if (elements.length > 0) {
-			builder.append(elements[0].castToString());
+			builder.append(elements[0].toString());
 		}
 
 		for (int i = 1; i < elements.length; i++) {
 			builder.append(",");
-			var cast = elements[i].castToString();
+			var cast = elements[i].toString();
 			if (elements[i].getType() == DataType.String) {
 				builder.append('"');
 				builder.append(cast);

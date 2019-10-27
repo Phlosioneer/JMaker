@@ -56,7 +56,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path != null);
 	}
 
@@ -70,7 +70,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path.toFile().isFile());
 	}
 
@@ -84,7 +84,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path.toFile().isDirectory());
 	}
 
@@ -98,7 +98,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		var filename = path.getFileName().toString();
 		var extensionIndex = filename.indexOf('.');
 		if (extensionIndex < 0) {
@@ -118,7 +118,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		var ret = new ArrayList<ExpressionValue>();
 		for (var part : path) {
 			ret.add(new StringValue(part.toString()));
@@ -136,7 +136,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		var absolutePath = path.toAbsolutePath();
 		return new StringValue(absolutePath.getParent().toString());
 	}
@@ -151,7 +151,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		return new StringValue(path.toAbsolutePath().toString());
 	}
 
@@ -165,7 +165,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		var dir = path.toFile();
 		if (!dir.isDirectory()) {
 			return new ArrayValue(new ExpressionValue[]{});
@@ -188,7 +188,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path.toFile().canRead());
 	}
 
@@ -202,7 +202,7 @@ public class FileSystemFunctions {
 			throw new ArgTypeException(args);
 		}
 
-		var path = stringToPath(pathExpr.asString());
+		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path.toFile().canWrite());
 	}
 
@@ -237,7 +237,7 @@ public class FileSystemFunctions {
 				if (stringExpr.getType() != DataType.String) {
 					throw new RuntimeException("joinPath expects an array of strings, found " + stringExpr.getType());
 				}
-				pathParts[i] = stringExpr.asString();
+				pathParts[i] = stringExpr.toString();
 			}
 		} else {
 			pathParts = new String[args.length];
@@ -246,7 +246,7 @@ public class FileSystemFunctions {
 				if (stringExpr.getType() != DataType.String) {
 					throw new ArgTypeException(args);
 				}
-				pathParts[i] = stringExpr.asString();
+				pathParts[i] = stringExpr.toString();
 			}
 		}
 

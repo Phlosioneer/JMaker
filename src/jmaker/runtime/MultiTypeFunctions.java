@@ -37,7 +37,7 @@ public class MultiTypeFunctions {
 		ExpressionValue arg = args[0];
 		switch (arg.getType()) {
 			case String:
-				return new IntegerValue(arg.asString().length());
+				return new IntegerValue(arg.toString().length());
 			case Array:
 				var castToArray = (ArrayValue) arg;
 				return new IntegerValue(castToArray.elements.length);
@@ -175,7 +175,7 @@ public class MultiTypeFunctions {
 
 		// Actual range code.
 		if (original.getType() == DataType.String) {
-			var originalString = original.asString();
+			var originalString = original.toString();
 			if (startInt == endInt || startInt >= originalString.length()) {
 				return new StringValue("");
 			}
@@ -212,8 +212,8 @@ public class MultiTypeFunctions {
 			if (target.getType() != DataType.String) {
 				throw new ArgTypeException(args);
 			}
-			var originalString = original.asString();
-			var targetString = target.asString();
+			var originalString = original.toString();
+			var targetString = target.toString();
 
 			if (range.start >= targetString.length()) {
 				return new IntegerValue(-1);
@@ -258,8 +258,8 @@ public class MultiTypeFunctions {
 			if (target.getType() != DataType.String) {
 				throw new ArgTypeException(args);
 			}
-			var originalString = original.asString();
-			var targetString = target.asString();
+			var originalString = original.toString();
+			var targetString = target.toString();
 
 			if (range.start >= originalString.length()) {
 				return new ArrayValue(new ExpressionValue[]{});

@@ -3,8 +3,6 @@ package jmaker.interpreter;
 public interface ExpressionValue {
 	DataType getType();
 
-	String castToString();
-
 	default boolean isIndexable() {
 		return false;
 	}
@@ -19,10 +17,6 @@ public interface ExpressionValue {
 
 	default boolean asBoolean() {
 		throw new RuntimeException(this + " isn't a boolean.");
-	}
-
-	default String asString() {
-		throw new RuntimeException(this + " isn't a string.");
 	}
 
 	default int asInteger() {

@@ -45,7 +45,7 @@ public class Interpreter {
 					if (command.getType() != DataType.String) {
 						throw new RuntimeException("Command expressions must return a string.");
 					}
-					pushCommand(command.asString());
+					pushCommand(command.toString());
 				} else {
 					runExpression(expression.expression);
 				}
@@ -76,7 +76,7 @@ public class Interpreter {
 			if (targetValue.getType() != DataType.String) {
 				throw new RuntimeException("Rule targets must be strings.");
 			}
-			resolvedTargets[i] = targetValue.asString();
+			resolvedTargets[i] = targetValue.toString();
 		}
 
 		for (int i = 0; i < statement.dependencies.length; i++) {
@@ -85,7 +85,7 @@ public class Interpreter {
 			if (depValue.getType() != DataType.String) {
 				throw new RuntimeException("Rule dependencies must be strings.");
 			}
-			resolvedDependencies[i] = depValue.asString();
+			resolvedDependencies[i] = depValue.toString();
 		}
 
 		if (commandQueue != null) {
@@ -249,11 +249,8 @@ public class Interpreter {
 		}
 
 		// Adding strings converts the other value to a string.
-		if (left.getType() == DataType.String) {
-			return new StringValue(left.asString() + right.castToString());
-		}
-		if (right.getType() == DataType.String) {
-			return new StringValue(left.castToString() + right.asString());
+		if (left.getType() == DataType.String || right.getType() == DataType.String) {
+			return new StringValue(left.toString() + right.toString());
 		}
 
 		// Numbers

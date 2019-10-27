@@ -38,17 +38,7 @@ public class StringValue implements ExpressionValue, Expression {
 	}
 
 	@Override
-	public String asString() {
-		return this.value;
-	}
-
-	@Override
 	public String toString() {
-		return "{\"" + value + "\"}";
-	}
-
-	@Override
-	public String castToString() {
 		return value;
 	}
 

@@ -3,7 +3,6 @@ package jmaker.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import tests.TestUtil;
 
 public interface Expression {
 	public static class Binary implements Expression {
@@ -15,11 +14,6 @@ public interface Expression {
 			this.left = left;
 			this.operator = operator;
 			this.right = right;
-		}
-
-		@Override
-		public String toString() {
-			return "{Binary, op: " + operator + ", left: " + left + ", right: " + right + "}";
 		}
 
 		@Override
@@ -50,11 +44,6 @@ public interface Expression {
 		}
 
 		@Override
-		public String toString() {
-			return "{Unary, op: " + operator + ", inner: " + inner + "}";
-		}
-
-		@Override
 		public int hashCode() {
 			return Objects.hash(inner, operator);
 		}
@@ -79,11 +68,6 @@ public interface Expression {
 		public Index(Expression variable, Expression indexExpression) {
 			this.variable = variable;
 			this.indexExpression = indexExpression;
-		}
-
-		@Override
-		public String toString() {
-			return "{Index, inner: " + variable + ", index: " + indexExpression + "}";
 		}
 
 		@Override
@@ -118,17 +102,6 @@ public interface Expression {
 		}
 
 		@Override
-		public String toString() {
-			var ret = new StringBuilder();
-			ret.append("{FunctionCall, function: ");
-			ret.append(functionName);
-			ret.append(", args: ");
-			ret.append(TestUtil.arrayToString(args));
-			ret.append("}");
-			return ret.toString();
-		}
-
-		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
@@ -155,11 +128,6 @@ public interface Expression {
 
 		public Symbol(String name) {
 			this.name = name;
-		}
-
-		@Override
-		public String toString() {
-			return "{" + name + "}";
 		}
 
 		@Override

@@ -22,11 +22,6 @@ public class DoubleValue implements Expression, ExpressionValue {
 
 	@Override
 	public String toString() {
-		return "{Double, " + value + "}";
-	}
-
-	@Override
-	public String castToString() {
 		return Double.toString(value);
 	}
 

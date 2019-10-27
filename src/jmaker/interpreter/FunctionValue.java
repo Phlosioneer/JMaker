@@ -15,7 +15,7 @@ public abstract class FunctionValue implements ExpressionValue {
 	}
 
 	@Override
-	public String castToString() {
+	public String toString() {
 		return "<Function " + symbolName + ">";
 	}
 }

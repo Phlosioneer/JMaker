@@ -17,11 +17,6 @@ public class BooleanValue implements ExpressionValue, Expression {
 
 	@Override
 	public String toString() {
-		return "{" + value + "}";
-	}
-
-	@Override
-	public String castToString() {
 		if (value) {
 			return "true";
 		} else {

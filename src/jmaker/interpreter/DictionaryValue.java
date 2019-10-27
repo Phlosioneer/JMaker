@@ -28,7 +28,7 @@ public class DictionaryValue implements ExpressionValue {
 	}
 
 	@Override
-	public String castToString() {
+	public String toString() {
 		var builder = new StringBuilder();
 		builder.append('{');
 		boolean shouldAddComma = false;
@@ -43,14 +43,14 @@ public class DictionaryValue implements ExpressionValue {
 			var value = entry.getValue();
 			if (key.getType() == DataType.String) {
 				builder.append('"');
-				builder.append(key.castToString());
+				builder.append(key.toString());
 				builder.append('"');
 			} else {
-				builder.append(key.castToString());
+				builder.append(key.toString());
 			}
 
 			builder.append(": ");
-			builder.append(value.castToString());
+			builder.append(value.toString());
 		}
 		builder.append('}');
 		return builder.toString();
