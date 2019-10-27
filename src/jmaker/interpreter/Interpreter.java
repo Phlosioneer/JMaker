@@ -17,24 +17,39 @@ import jmaker.parser.Statement.ExpressionStatement;
 import jmaker.parser.Statement.If;
 import jmaker.parser.Statement.Rule;
 import jmaker.parser.Statement.WhileLoop;
+import jmaker.runtime.DictionaryFunctions;
+import jmaker.runtime.FileSystemFunctions;
+import jmaker.runtime.MathFunctions;
+import jmaker.runtime.MultiTypeFunctions;
+import jmaker.runtime.StringFunctions;
+import jmaker.runtime.TypeFunctions;
 
 public class Interpreter {
 	Block script;
-	Memory memory;
+	public Memory memory;
 	ArrayList<String> commandQueue;
 	ArrayList<RuleValue> allRules;
 
 	public Interpreter(Block script) {
 		this.script = script;
 		memory = new Memory();
+		DictionaryFunctions.registerAll(memory);
+		FileSystemFunctions.registerAll(memory);
+		MathFunctions.register(memory);
+		MultiTypeFunctions.registerAll(memory);
+		//ShellFunctions.registerAll(memory);
+		StringFunctions.registerAll(memory);
+		TypeFunctions.registerAll(memory);
 	}
 
 	public void run() {
-		runBlock(script);
+		runBlock(script, false);
 	}
 
-	public void runBlock(Block block) {
-		memory.pushScope();
+	public void runBlock(Block block, boolean newScope) {
+		if (newScope) {
+			memory.pushScope();
+		}
 		for (var statement : block.statements) {
 			if (statement instanceof Assignment) {
 				runAssignment((Assignment) statement);
@@ -50,7 +65,7 @@ public class Interpreter {
 					runExpression(expression.expression);
 				}
 			} else if (statement instanceof BlockStatement) {
-				runBlock(((BlockStatement) statement).block);
+				runBlock(((BlockStatement) statement).block, true);
 			} else if (statement instanceof If) {
 				runIf((If) statement);
 			} else if (statement instanceof WhileLoop) {
@@ -63,7 +78,9 @@ public class Interpreter {
 				throw new RuntimeException("Unrecognized statement type: " + statement);
 			}
 		}
-		memory.popScope();
+		if (newScope) {
+			memory.popScope();
+		}
 	}
 
 	private void createRule(Rule statement) {
@@ -93,7 +110,7 @@ public class Interpreter {
 		}
 		commandQueue = new ArrayList<>();
 
-		runBlock(statement.block);
+		runBlock(statement.block, true);
 
 		var commandsAsRawArray = commandQueue.toArray(size->new String[size]);
 		allRules.add(new RuleValue(resolvedTargets, resolvedDependencies, commandsAsRawArray));
@@ -114,13 +131,13 @@ public class Interpreter {
 				throw new RuntimeException("Conditionals must return a boolean.");
 			}
 			if (result.asBoolean()) {
-				runBlock(statement.blocks[i]);
+				runBlock(statement.blocks[i], true);
 				return;
 			}
 		}
 
 		if (statement.elseBlock != null) {
-			runBlock(statement.elseBlock);
+			runBlock(statement.elseBlock, true);
 		}
 	}
 
@@ -138,7 +155,7 @@ public class Interpreter {
 			if (!value.asBoolean()) {
 				break;
 			}
-			runBlock(statement.block);
+			runBlock(statement.block, true);
 		}
 	}
 
@@ -203,6 +220,28 @@ public class Interpreter {
 				args[i] = runExpression(arg);
 			}
 			return ((FunctionValue) function).call(args);
+		}
+		if (expression instanceof Expression.Array) {
+			var castArray = (Expression.Array) expression;
+			var elements = new ExpressionValue[castArray.elements.length];
+			for (int i = 0; i < castArray.elements.length; i++) {
+				var currentExpression = castArray.elements[i];
+				elements[i] = runExpression(currentExpression);
+			}
+			return new ArrayValue(elements);
+		}
+		if (expression instanceof Expression.Dictionary) {
+			var castDict = (Expression.Dictionary) expression;
+			var map = new HashMap<ExpressionValue, ExpressionValue>();
+			assert (castDict.keys.length == castDict.values.length);
+			for (int i = 0; i < castDict.keys.length; i++) {
+				var keyExpr = castDict.keys[i];
+				var valueExpr = castDict.keys[i];
+				var key = runExpression(keyExpr);
+				var value = runExpression(valueExpr);
+				map.put(key, value);
+			}
+			return new DictionaryValue(map);
 		}
 		throw new RuntimeException("Unrecognized expression type: " + expression.getClass().getName());
 	}

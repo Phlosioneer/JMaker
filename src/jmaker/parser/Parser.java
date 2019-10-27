@@ -58,41 +58,12 @@ public class Parser {
 				// An empty / no-op statement.
 				return new Statement.Empty();
 			case NAME:
-				// This could be either an assignment, a rule, or an expression.
-				currentIndex -= 1;
-
-				// Scan ahead. An EQUALS token is only allowed inside an assigment, COLON
-				// is only allowed in rules, and expressions are terminated by ";", so we
-				// can scan until we find EQUALS, COLON, or SEMICOLON.
-				boolean isAssignment = false;
-				boolean isExpression = false;
-				boolean isRule = false;
-				for (int i = currentIndex; i < tokens.size(); i++) {
-					Token current = tokens.get(i);
-					if (current.type == TokenType.EQUALS) {
-						isAssignment = true;
-						break;
-					}
-					if (current.type == TokenType.SEMICOLON) {
-						isExpression = true;
-						break;
-					}
-					if (current.type == TokenType.COLON) {
-						isRule = true;
-						break;
-					}
-				}
-				if (isAssignment) {
+				if (peek().type == TokenType.EQUALS) {
+					currentIndex -= 1;
 					return parseAssignment(true);
-				} else if (isExpression) {
-					var expression2 = parseExpression();
-					mustMatch(TokenType.SEMICOLON);
-					return new Statement.ExpressionStatement(expression2, false);
-				} else if (isRule) {
-					return parseRule(null);
-				} else {
-					throw new RuntimeException("Statement not terminated by ';'");
 				}
+				// Intentionall fallthrough.
+
 			default:
 				// It must be an expression or a rule.
 				currentIndex -= 1;
@@ -278,9 +249,44 @@ public class Parser {
 				} else {
 					return name;
 				}
+			case BRACKET_LEFT:
+				return parseArray();
+			case CURL_LEFT:
+				return parseDictionary();
 			default:
 				throw new RuntimeException("Unrecognized token for Primary: " + nextToken);
 		}
+	}
+
+	private Expression parseArray() {
+		if (tryMatchToken(TokenType.BRACKET_RIGHT)) {
+			return new Expression.Array(new Expression[]{});
+		}
+		var ret = new ArrayList<Expression>();
+		ret.add(parseExpression());
+		while (tryMatchToken(TokenType.COMMA)) {
+			ret.add(parseExpression());
+		}
+		mustMatch(TokenType.BRACKET_RIGHT);
+		return new Expression.Array(ret);
+	}
+
+	private Expression parseDictionary() {
+		if (tryMatchToken(TokenType.CURL_RIGHT)) {
+			return new Expression.Dictionary(new Expression[]{}, new Expression[]{});
+		}
+		var keys = new ArrayList<Expression>();
+		var values = new ArrayList<Expression>();
+		keys.add(parseExpression());
+		mustMatch(TokenType.COLON);
+		values.add(parseExpression());
+		while (tryMatchToken(TokenType.COMMA)) {
+			keys.add(parseExpression());
+			mustMatch(TokenType.COLON);
+			values.add(parseExpression());
+		}
+		mustMatch(TokenType.CURL_RIGHT);
+		return new Expression.Dictionary(keys, values);
 	}
 
 	private Expression parseIndex(Expression base) {

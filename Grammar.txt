@@ -4,8 +4,10 @@
 # 1 or more times: ( )+
 # 0 or 1 times: ( )?
 
+
 file = ( statement )*
-statement = assignment | if | while | for | rule | ( ">" )? expression ";"
+# NOTE: Statements cannot begin with a dictionary literal. See bottom of file.
+statement = assignment | if | while | for | rule | ( ">" )? expression ";" | block
 
 # Variables
 assignment = name "=" expression ";"
@@ -48,3 +50,8 @@ primary = literal | "(" expression ")" ( index | args )? | name ( index | args )
 literal = NUMBER | STRING | "true" | "false" | arrayLiteral | dictLiteral
 args = "(" expressionList ")"
 index = ( "[" expression "]" )+
+
+# If a statement is a block, then a line starting with "{" is ambiguous. It could be
+# a block, or it could be a literal dictionary. The lookahead is very expensive and complex.
+# Instead, we're copying what Javascript does, and just make starting a line with an object
+# literal illegal.

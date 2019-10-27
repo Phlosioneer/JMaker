@@ -18,7 +18,7 @@ public class DictionaryFunctions {
 		new NativeFunction("contains", DictionaryFunctions::contains)
 	};
 
-	public void registerAll(Memory memory) {
+	public static void registerAll(Memory memory) {
 		for (var func : functions) {
 			memory.set(func.symbolName, func);
 		}

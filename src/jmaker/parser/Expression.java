@@ -5,6 +5,73 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public interface Expression {
+	public static class Array implements Expression {
+		public final Expression[] elements;
+
+		public Array(ArrayList<Expression> elements) {
+			this(elements.toArray(size->new Expression[size]));
+		}
+
+		public Array(Expression[] elements) {
+			this.elements = elements;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + Arrays.hashCode(elements);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof Array)) {
+				return false;
+			}
+			Array other = (Array) obj;
+			return Arrays.equals(elements, other.elements);
+		}
+	}
+
+	public static class Dictionary implements Expression {
+		public final Expression[] keys;
+		public final Expression[] values;
+
+		public Dictionary(ArrayList<Expression> keys, ArrayList<Expression> values) {
+			this(keys.toArray(size->new Expression[size]), values.toArray(size->new Expression[size]));
+		}
+
+		public Dictionary(Expression[] keys, Expression[] values) {
+			this.keys = keys;
+			this.values = values;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + Arrays.hashCode(keys);
+			result = prime * result + Arrays.hashCode(values);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof Dictionary)) {
+				return false;
+			}
+			Dictionary other = (Dictionary) obj;
+			return Arrays.equals(keys, other.keys) && Arrays.equals(values, other.values);
+		}
+	}
+
 	public static class Binary implements Expression {
 		public final Expression left;
 		public final BinaryOperator operator;

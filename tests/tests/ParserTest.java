@@ -464,4 +464,70 @@ class ParserTest {
 		assertEquals(expectedTree, output);
 	}
 
+	@Test
+	void testArrayLiteral() {
+		var input = new Lexer("[4, 2, true, []];");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.ExpressionStatement(
+					//
+					new Expression.Array(new Expression[]{
+						new IntegerValue(4),
+						new IntegerValue(2),
+						new BooleanValue(true),
+						new Expression.Array(new Expression[]{})
+					}),
+					//
+					false)
+		});
+
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testDictLiteral() {
+		// Note: Statements can't start with a dict literal
+		var input = new Lexer("0+{2: 2, \"foo\": bar, 2: baz, [fizz, 7.5]: {}};");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.ExpressionStatement(
+					//
+					new Expression.Binary(
+							//
+							new IntegerValue(0),
+							//
+							BinaryOperator.ADD,
+							//
+							new Expression.Dictionary(
+									//
+									new Expression[]{
+										new IntegerValue(2),
+										new StringValue("foo"),
+										new IntegerValue(2),
+										new Expression.Array(new Expression[]{
+											new Expression.Symbol("fizz"),
+											new DoubleValue(7.5)
+										})
+									},
+									//
+									new Expression[]{
+										new IntegerValue(2),
+										new Expression.Symbol("bar"),
+										new Expression.Symbol("baz"),
+										new Expression.Dictionary(
+												//
+												new Expression[]{},
+												//
+												new Expression[]{})
+									})),
+					//
+					false)
+		});
+
+		assertEquals(expectedTree, output);
+	}
 }
