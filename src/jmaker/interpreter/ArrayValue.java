@@ -1,6 +1,7 @@
 package jmaker.interpreter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ArrayValue implements ExpressionValue {
 	public final ExpressionValue[] elements;
@@ -60,16 +61,21 @@ public class ArrayValue implements ExpressionValue {
 
 	@Override
 	public int hashCode() {
-		return elements.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(elements);
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		if (!(obj instanceof ArrayValue)) {
 			return false;
 		}
-
 		ArrayValue other = (ArrayValue) obj;
-		return elements.equals(other.elements);
+		return Arrays.equals(elements, other.elements);
 	}
 }

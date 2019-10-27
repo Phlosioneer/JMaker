@@ -1,6 +1,7 @@
 package jmaker.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import tests.TestUtil;
 
 public class Block {
@@ -18,4 +19,25 @@ public class Block {
 	public String toString() {
 		return TestUtil.arrayToString(statements);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(statements);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Block)) {
+			return false;
+		}
+		Block other = (Block) obj;
+		return Arrays.equals(statements, other.statements);
+	}
+
 }

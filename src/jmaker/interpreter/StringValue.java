@@ -1,5 +1,6 @@
 package jmaker.interpreter;
 
+import java.util.Objects;
 import jmaker.parser.Expression;
 
 public class StringValue implements ExpressionValue, Expression {
@@ -53,16 +54,18 @@ public class StringValue implements ExpressionValue, Expression {
 
 	@Override
 	public int hashCode() {
-		return value.hashCode();
+		return Objects.hash(value);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		if (!(obj instanceof StringValue)) {
 			return false;
 		}
 		StringValue other = (StringValue) obj;
-
-		return value.equals(other.value);
+		return Objects.equals(value, other.value);
 	}
 }

@@ -1,6 +1,7 @@
 package jmaker.interpreter;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class DictionaryValue implements ExpressionValue {
 
@@ -57,16 +58,18 @@ public class DictionaryValue implements ExpressionValue {
 
 	@Override
 	public int hashCode() {
-		return elements.hashCode();
+		return Objects.hash(elements);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		if (!(obj instanceof DictionaryValue)) {
 			return false;
 		}
-
 		DictionaryValue other = (DictionaryValue) obj;
-		return elements.equals(other.elements);
+		return Objects.equals(elements, other.elements);
 	}
 }

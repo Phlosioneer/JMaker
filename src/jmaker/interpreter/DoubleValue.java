@@ -1,5 +1,6 @@
 package jmaker.interpreter;
 
+import java.util.Objects;
 import jmaker.parser.Expression;
 
 public class DoubleValue implements Expression, ExpressionValue {
@@ -31,16 +32,19 @@ public class DoubleValue implements Expression, ExpressionValue {
 
 	@Override
 	public int hashCode() {
-		return Double.hashCode(value);
+		return Objects.hash(value);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		if (!(obj instanceof DoubleValue)) {
 			return false;
 		}
 		DoubleValue other = (DoubleValue) obj;
-
-		return value == other.value;
+		return Double.doubleToLongBits(value) == Double.doubleToLongBits(other.value);
 	}
+
 }

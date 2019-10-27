@@ -1,5 +1,7 @@
 package jmaker.parser;
 
+import java.util.Objects;
+
 public class Span {
 
 	public final int startLine;
@@ -44,5 +46,22 @@ public class Span {
 		} else {
 			return startLine + ":" + startColumn + " - " + endLine + ":" + endColumn;
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(endColumn, endLine, endSet, startColumn, startLine);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Span)) {
+			return false;
+		}
+		Span other = (Span) obj;
+		return endColumn == other.endColumn && endLine == other.endLine && endSet == other.endSet && startColumn == other.startColumn && startLine == other.startLine;
 	}
 }

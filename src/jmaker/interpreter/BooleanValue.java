@@ -1,5 +1,6 @@
 package jmaker.interpreter;
 
+import java.util.Objects;
 import jmaker.parser.Expression;
 
 public class BooleanValue implements ExpressionValue, Expression {
@@ -30,15 +31,19 @@ public class BooleanValue implements ExpressionValue, Expression {
 
 	@Override
 	public int hashCode() {
-		return Boolean.hashCode(value);
+		return Objects.hash(value);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		if (!(obj instanceof BooleanValue)) {
 			return false;
 		}
 		BooleanValue other = (BooleanValue) obj;
 		return value == other.value;
-	};
+	}
+
 }
