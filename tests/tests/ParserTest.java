@@ -15,10 +15,6 @@ import jmaker.parser.Statement;
 
 class ParserTest {
 
-	public ParserTest() {
-
-	}
-
 	@Test
 	void testFile1() {
 		var input = TestUtil.readFile("parserTest1.txt");
@@ -77,7 +73,7 @@ class ParserTest {
 					}))
 		});
 
-		assertEquals(expectedTree.toString(), output.toString());
+		assertEquals(expectedTree, output);
 	}
 
 	@Test
@@ -262,14 +258,210 @@ class ParserTest {
 										}),
 								//
 								false),
-						new Statement.Assignment(
-								//
-								new Expression.Symbol("var1"),
-								//
-								new IntegerValue(0))
+						new Statement.BlockStatement(new Block(new Statement[]{
+							new Statement.Assignment(
+									//
+									new Expression.Symbol("var1"),
+									//
+									new IntegerValue(0))
+						}))
 					}))
 		});
 
-		assertEquals(expectedTree.toString(), output.toString());
+		assertEquals(expectedTree, output);
 	}
+
+	@Test
+	void testEmptyStatement() {
+		var input = new Lexer(";");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.Empty()
+		});
+
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testRuleStartingWithName() {
+		var input = new Lexer("targetPath : \"foo.c\" {}");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.Rule(
+					//
+					new Expression[]{
+						new Expression.Symbol("targetPath")
+					},
+					//
+					new Expression[]{
+						new StringValue("foo.c")
+					}, new Block(new Statement[]{}))
+		});
+
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testExpressionNotStartingWithName() {
+		var input = new Lexer("2 + 2;");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.ExpressionStatement(
+					//
+					new Expression.Binary(
+							//
+							new IntegerValue(2),
+							//
+							BinaryOperator.ADD,
+							//
+							new IntegerValue(2)),
+					//
+					false)
+		});
+
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testChainedLogicOperators() {
+		var input = new Lexer("true && b && false;true || b || false;");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.ExpressionStatement(
+					//
+					new Expression.Binary(
+							//
+							//
+							new Expression.Binary(
+									//
+									new BooleanValue(true),
+									//
+									BinaryOperator.AND,
+									//
+									new Expression.Symbol("b")),
+							//
+							BinaryOperator.AND,
+							//
+							new BooleanValue(false)),
+					//
+					false),
+			new Statement.ExpressionStatement(
+					//
+					new Expression.Binary(
+							//
+							//
+							new Expression.Binary(
+									//
+									new BooleanValue(true),
+									//
+									BinaryOperator.OR,
+									//
+									new Expression.Symbol("b")),
+							//
+							BinaryOperator.OR,
+							//
+							new BooleanValue(false)),
+					//
+					false)
+		});
+
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testElseIfWithoutFinalElse() {
+		var input = new Lexer("if (true) {\"foo\";} else if (false) {7;}");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.If(
+					//
+					new Expression[]{
+						new BooleanValue(true),
+						new BooleanValue(false)
+					},
+					//
+					new Block[]{
+						new Block(new Statement[]{
+							new Statement.ExpressionStatement(new StringValue("foo"), false)
+						}),
+						new Block(new Statement[]{
+							new Statement.ExpressionStatement(new IntegerValue(7), false)
+						})
+					})
+		});
+
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testIndirectFunctionCall() {
+		var input = new Lexer("(foo[0])(\"bar\", 5 + 3);");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.ExpressionStatement(
+					//
+					new Expression.FunctionCall(
+							//
+							new Expression.Index(
+									//
+									new Expression.Symbol("foo"),
+									//
+									new IntegerValue(0)),
+							//
+							new Expression[]{
+								new StringValue("bar"),
+								new Expression.Binary(
+										//
+										new IntegerValue(5),
+										//
+										BinaryOperator.ADD,
+										//
+										new IntegerValue(3))
+							}),
+					//
+					false)
+		});
+
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testIndirectIndex() {
+		var input = new Lexer("(foo + bar)[\"baz\"];");
+		var parser = new Parser(input.scanAll());
+		var output = parser.parseFile();
+
+		var expectedTree = new Block(new Statement[]{
+			new Statement.ExpressionStatement(
+					//
+					new Expression.Index(
+							//
+							new Expression.Binary(
+									//
+									new Expression.Symbol("foo"),
+									//
+									BinaryOperator.ADD,
+									//
+									new Expression.Symbol("bar")),
+							//
+							new StringValue("baz")),
+					//
+					false)
+		});
+
+		assertEquals(expectedTree, output);
+	}
+
 }

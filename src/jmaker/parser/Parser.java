@@ -89,8 +89,7 @@ public class Parser {
 					mustMatch(TokenType.SEMICOLON);
 					return new Statement.ExpressionStatement(expression2, false);
 				} else if (isRule) {
-					// TODO
-					throw new UnsupportedOperationException("Rule code not yet abstracted");
+					return parseRule(null);
 				} else {
 					throw new RuntimeException("Statement not terminated by ';'");
 				}
@@ -100,24 +99,35 @@ public class Parser {
 				var firstExpression = parseExpression();
 				if (tryMatchToken(TokenType.SEMICOLON)) {
 					return new Statement.ExpressionStatement(firstExpression, false);
+				} else {
+					// It must be a rule.
+					return parseRule(firstExpression);
 				}
-				// It must be a rule.
-				ArrayList<Expression> targets = new ArrayList<>();
-				targets.add(firstExpression);
-				while (tryMatchToken(TokenType.COMMA)) {
-					targets.add(parseExpression());
-				}
-				mustMatch(TokenType.COLON);
-				ArrayList<Expression> deps = new ArrayList<>();
-				if (peek().type != TokenType.CURL_LEFT) {
-					deps.add(parseExpression());
-					while (tryMatchToken(TokenType.COMMA)) {
-						deps.add(parseExpression());
-					}
-				}
-				var ruleBlock = parseBlock();
-				return new Statement.Rule(targets, deps, ruleBlock);
 		}
+	}
+
+	private Statement.Rule parseRule(Expression firstExpression) {
+		var targets = new ArrayList<Expression>();
+		if (firstExpression != null) {
+			targets.add(firstExpression);
+		} else {
+			var realFirstExpression = parseExpression();
+			targets.add(realFirstExpression);
+		}
+
+		while (tryMatchToken(TokenType.COMMA)) {
+			targets.add(parseExpression());
+		}
+		mustMatch(TokenType.COLON);
+		ArrayList<Expression> deps = new ArrayList<>();
+		if (peek().type != TokenType.CURL_LEFT) {
+			deps.add(parseExpression());
+			while (tryMatchToken(TokenType.COMMA)) {
+				deps.add(parseExpression());
+			}
+		}
+		var ruleBlock = parseBlock();
+		return new Statement.Rule(targets, deps, ruleBlock);
 	}
 
 	private Statement.Assignment parseAssignment(boolean expectSemicolon) {
@@ -250,7 +260,7 @@ public class Parser {
 			case PAREN_LEFT:
 				var expression = parseExpression();
 				mustMatch(TokenType.PAREN_RIGHT);
-				if (tryMatchToken(TokenType.BRACKET_LEFT)) {
+				if (peek().type == TokenType.BRACKET_LEFT) {
 					return parseIndex(expression);
 				} else if (tryMatchToken(TokenType.PAREN_LEFT)) {
 					var args = parseArgs();

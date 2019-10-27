@@ -19,7 +19,9 @@ for (i = 0; i < 20; i = i + 1) {
 
 while var1 >= 2 {
 	println("Hello World", var1);
-	var1 = 0;
+	{
+		var1 = 0;
+	}
 }
 
 /* Block comment at end-of-file
