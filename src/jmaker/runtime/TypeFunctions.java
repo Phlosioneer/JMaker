@@ -8,19 +8,40 @@ import jmaker.interpreter.ExpressionValue;
 import jmaker.interpreter.FunctionValue;
 import jmaker.interpreter.IntegerValue;
 import jmaker.interpreter.Memory;
+import jmaker.runtime.NativeFunction.SigType;
 
 public class TypeFunctions {
 	private static NativeFunction[] functions = new NativeFunction[]{
-		new NativeFunction("isBool", TypeFunctions::isBool),
-		new NativeFunction("isInteger", TypeFunctions::isInteger),
-		new NativeFunction("isDouble", TypeFunctions::isDouble),
-		new NativeFunction("isString", TypeFunctions::isString),
-		new NativeFunction("isArray", TypeFunctions::isArray),
-		new NativeFunction("isDict", TypeFunctions::isDict),
-		new NativeFunction("isFunction", TypeFunctions::isFunction),
-		new NativeFunction("parseInt", TypeFunctions::parseInt),
-		new NativeFunction("parseDouble", TypeFunctions::parseDouble),
-		new NativeFunction("call", TypeFunctions::callFunction)
+		new NativeFunction("isBool", TypeFunctions::isBool, new SigType[]{
+			SigType.Any
+		}),
+		new NativeFunction("isInteger", TypeFunctions::isInteger, new SigType[]{
+			SigType.Any
+		}),
+		new NativeFunction("isDouble", TypeFunctions::isDouble, new SigType[]{
+			SigType.Any
+		}),
+		new NativeFunction("isString", TypeFunctions::isString, new SigType[]{
+			SigType.Any
+		}),
+		new NativeFunction("isArray", TypeFunctions::isArray, new SigType[]{
+			SigType.Any
+		}),
+		new NativeFunction("isDict", TypeFunctions::isDict, new SigType[]{
+			SigType.Any
+		}),
+		new NativeFunction("isFunction", TypeFunctions::isFunction, new SigType[]{
+			SigType.Any
+		}),
+		new NativeFunction("parseInt", TypeFunctions::parseInt, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("parseDouble", TypeFunctions::parseDouble, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("call", TypeFunctions::callFunction, new SigType[]{
+			SigType.Function, SigType.Array
+		})
 	};
 
 	public static void registerAll(Memory memory) {
@@ -30,102 +51,48 @@ public class TypeFunctions {
 	}
 
 	public static ExpressionValue isBool(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		return new BooleanValue(args[0].getType() == DataType.Boolean);
 	}
 
 	public static ExpressionValue isInteger(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		return new BooleanValue(args[0].getType() == DataType.Number_Int);
 	}
 
 	public static ExpressionValue isDouble(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		return new BooleanValue(args[0].getType() == DataType.Number_Double);
 	}
 
 	public static ExpressionValue isString(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		return new BooleanValue(args[0].getType() == DataType.String);
 	}
 
 	public static ExpressionValue isArray(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		return new BooleanValue(args[0].getType() == DataType.Array);
 	}
 
 	public static ExpressionValue isDict(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		return new BooleanValue(args[0].getType() == DataType.Dictionary);
 	}
 
 	public static ExpressionValue isFunction(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		return new BooleanValue(args[0].getType() == DataType.Function);
 	}
 
 	public static ExpressionValue parseInt(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var arg = args[0];
-
-		if (arg.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
 
 		return new IntegerValue(Integer.parseInt(arg.toString()));
 	}
 
 	public static ExpressionValue parseDouble(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var arg = args[0];
-
-		if (arg.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
 
 		return new DoubleValue(Double.parseDouble(arg.toString()));
 	}
 
 	public static ExpressionValue callFunction(ExpressionValue[] args) {
-		if (args.length != 2) {
-			throw new ArgCountException(2, args.length);
-		}
-
-		var functionExpr = args[0];
-		var functionArgsExpr = args[1];
-
-		if (functionExpr.getType() != DataType.Function || functionArgsExpr.getType() != DataType.Array) {
-			throw new ArgTypeException(args);
-		}
-		var function = (FunctionValue) functionExpr;
-		var functionArgs = ((ArrayValue) functionArgsExpr).elements;
+		var function = (FunctionValue) args[0];
+		var functionArgs = ((ArrayValue) args[1]).elements;
 
 		return function.call(functionArgs);
 	}

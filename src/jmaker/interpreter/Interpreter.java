@@ -236,7 +236,7 @@ public class Interpreter {
 			assert (castDict.keys.length == castDict.values.length);
 			for (int i = 0; i < castDict.keys.length; i++) {
 				var keyExpr = castDict.keys[i];
-				var valueExpr = castDict.keys[i];
+				var valueExpr = castDict.values[i];
 				var key = runExpression(keyExpr);
 				var value = runExpression(valueExpr);
 				map.put(key, value);

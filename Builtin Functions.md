@@ -39,7 +39,7 @@
 * `Array values(Dict dict)`
 * `Array pairs(Dict dict)` Returns an array of `[key, value]` pairs.
 * `Dict subDict(Dict original, Array includeKeys)`
-* `Bool contains(Dict dict)`
+* `Bool contains(Dict dict, Any key)`
 
 ### Functions
 
