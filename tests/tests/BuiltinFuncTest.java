@@ -1,118 +1,20 @@
 package tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-import java.util.ArrayList;
+import static tests.TestUtil.assertArrayEqualsUnordered;
+import static tests.TestUtil.runProgram;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import jmaker.interpreter.ArrayValue;
 import jmaker.interpreter.BooleanValue;
-import jmaker.interpreter.DataType;
 import jmaker.interpreter.DictionaryValue;
 import jmaker.interpreter.DoubleValue;
 import jmaker.interpreter.ExpressionValue;
 import jmaker.interpreter.IntegerValue;
-import jmaker.interpreter.Interpreter;
 import jmaker.interpreter.StringValue;
-import jmaker.parser.Lexer;
-import jmaker.parser.Parser;
 
 class BuiltinFuncTest {
-
-	// Default outVar is "out".
-	private static ExpressionValue runProgram(String code) {
-		return runProgram(code, "out");
-	}
-
-	private static ExpressionValue runProgram(String code, String outVar) {
-		var lexer = new Lexer(code);
-		var parser = new Parser(lexer.scanAll());
-		var interpreter = new Interpreter(parser.parseFile());
-		interpreter.run();
-		var ret = interpreter.memory.get(outVar);
-		assertNotNull(ret, outVar + " wasn't defined");
-		return ret;
-	}
-
-	private static ExpressionValue runProgram(String[] code) {
-		return runProgram(code, "out");
-	}
-
-	private static ExpressionValue runProgram(String[] code, String outVar) {
-		var builder = new StringBuilder();
-		builder.append(code[0]);
-		for (int i = 1; i < code.length; i++) {
-			builder.append('\n');
-			builder.append(code[i]);
-		}
-
-		return runProgram(builder.toString(), outVar);
-	}
-
-	private static void assertArrayEqualsUnordered(ExpressionValue[] expected, ExpressionValue actual) {
-		assertNotNull(actual);
-		assertEquals(actual.getType(), DataType.Array);
-		var inner = ((ArrayValue) actual).elements;
-		assertArrayEqualsUnordered(expected, inner);
-	}
-
-	private static void assertArrayEqualsUnordered(ExpressionValue[] expected, ExpressionValue[] actual) {
-		assert (expected != null);
-		assertNotNull(actual);
-		assertEquals(expected.length, actual.length);
-
-		var foundExpectedElements = new boolean[expected.length];
-		var foundActualElements = new boolean[actual.length];
-		for (int i = 0; i < foundExpectedElements.length; i++) {
-			foundExpectedElements[i] = false;
-			foundActualElements[i] = false;
-		}
-
-		for (int i = 0; i < actual.length; i++) {
-			for (int j = 0; j < expected.length; j++) {
-				if (foundExpectedElements[j]) {
-					continue;
-				}
-				if (expected[j].equals(actual[i])) {
-					foundExpectedElements[j] = true;
-					foundActualElements[i] = true;
-					break;
-				}
-			}
-		}
-
-		// Did we find everything?
-		boolean foundAll = true;
-		for (var flag : foundExpectedElements) {
-			if (!flag) {
-				foundAll = false;
-			}
-		}
-		if (foundAll) {
-			return;
-		}
-
-		// Figure out the difference.
-		var missingElements = new ArrayList<ExpressionValue>();
-		var unexpectedElements = new ArrayList<ExpressionValue>();
-		for (int i = 0; i < expected.length; i++) {
-			if (!foundExpectedElements[i]) {
-				missingElements.add(expected[i]);
-			}
-			if (!foundActualElements[i]) {
-				unexpectedElements.add(actual[i]);
-			}
-		}
-
-		var message = new StringBuilder();
-		message.append("Expected elements missing: ");
-		message.append(missingElements);
-		message.append(", unexpected elements found: ");
-		message.append(unexpectedElements);
-		fail(message.toString());
-	}
 
 	@Test
 	void testTypeFunctions() {
@@ -429,5 +331,74 @@ class BuiltinFuncTest {
 		assertEquals(new ArrayValue(new ExpressionValue[]{}), out);
 		out = runProgram("out = findAll([\"foo\"], \"foo\", 8);");
 		assertEquals(new ArrayValue(new ExpressionValue[]{}), out);
+	}
+
+	@Test
+	void testMathFunctions() {
+		ExpressionValue out;
+
+		out = runProgram("out = round(3.2);");
+		assertEquals(new IntegerValue(3), out);
+		out = runProgram("out = round(3.7);");
+		assertEquals(new IntegerValue(4), out);
+		out = runProgram("out = round(-0.5);");
+		assertEquals(new IntegerValue(0), out);
+		out = runProgram("out = round(-3.6);");
+		assertEquals(new IntegerValue(-4), out);
+		out = runProgram("out = round(10);");
+		assertEquals(new IntegerValue(10), out);
+
+		out = runProgram("out = floor(3.2);");
+		assertEquals(new IntegerValue(3), out);
+		out = runProgram("out = floor(3.7);");
+		assertEquals(new IntegerValue(3), out);
+		out = runProgram("out = floor(-0.5);");
+		assertEquals(new IntegerValue(-1), out);
+		out = runProgram("out = floor(-3.6);");
+		assertEquals(new IntegerValue(-4), out);
+		out = runProgram("out = floor(10);");
+		assertEquals(new IntegerValue(10), out);
+
+		out = runProgram("out = ceil(3.2);");
+		assertEquals(new IntegerValue(4), out);
+		out = runProgram("out = ceil(3.7);");
+		assertEquals(new IntegerValue(4), out);
+		out = runProgram("out = ceil(-0.5);");
+		assertEquals(new IntegerValue(0), out);
+		out = runProgram("out = ceil(-3.6);");
+		assertEquals(new IntegerValue(-3), out);
+		out = runProgram("out = ceil(10);");
+		assertEquals(new IntegerValue(10), out);
+
+		out = runProgram("out = abs(3.2);");
+		assertEquals(new DoubleValue(3.2), out);
+		out = runProgram("out = abs(3.7);");
+		assertEquals(new DoubleValue(3.7), out);
+		out = runProgram("out = abs(-0.5);");
+		assertEquals(new DoubleValue(0.5), out);
+		out = runProgram("out = abs(-3.6);");
+		assertEquals(new DoubleValue(3.6), out);
+		out = runProgram("out = abs(10);");
+		assertEquals(new IntegerValue(10), out);
+		out = runProgram("out = abs(-32);");
+		assertEquals(new IntegerValue(32), out);
+
+		out = runProgram("out = max(3, 10);");
+		assertEquals(new IntegerValue(10), out);
+		out = runProgram("out = max(3.1, 10);");
+		assertEquals(new DoubleValue(10), out);
+		out = runProgram("out = max(3, 10.1);");
+		assertEquals(new DoubleValue(10.1), out);
+		out = runProgram("out = max(4, -4);");
+		assertEquals(new IntegerValue(4), out);
+
+		out = runProgram("out = min(3, 10);");
+		assertEquals(new IntegerValue(3), out);
+		out = runProgram("out = min(3.1, 10);");
+		assertEquals(new DoubleValue(3.1), out);
+		out = runProgram("out = min(3, 10.1);");
+		assertEquals(new DoubleValue(3), out);
+		out = runProgram("out = min(4, -4);");
+		assertEquals(new IntegerValue(-4), out);
 	}
 }

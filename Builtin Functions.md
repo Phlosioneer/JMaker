@@ -65,8 +65,6 @@
 * `Number abs(Number value)`
 * `Number max(Number value, Number value)`
 * `Number min(Number value, Number value)`
-* `Bool numberCanBeInt(Number value)` Is this number exactly represented by an integer? 
-  Always returns true if `value` is an Integer.
 
 ### Filesystem
 

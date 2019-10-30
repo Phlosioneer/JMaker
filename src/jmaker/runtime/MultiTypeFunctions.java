@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import jmaker.interpreter.ArrayValue;
-import jmaker.interpreter.DataType;
 import jmaker.interpreter.DictionaryValue;
 import jmaker.interpreter.ExpressionValue;
 import jmaker.interpreter.IntegerValue;
 import jmaker.interpreter.Memory;
 import jmaker.interpreter.StringValue;
+import jmaker.main.UnreachableCodeBlockException;
 import jmaker.runtime.NativeFunction.SigType;
 
 public class MultiTypeFunctions {
@@ -117,7 +117,7 @@ public class MultiTypeFunctions {
 				var castToDict = (DictionaryValue) arg;
 				return new IntegerValue(castToDict.elements.size());
 			default:
-				throw new RuntimeException();
+				throw new UnreachableCodeBlockException();
 		}
 	}
 
@@ -127,35 +127,38 @@ public class MultiTypeFunctions {
 		var indexExpr = args[1];
 		var newValue = args[2];
 
-		if (originalExpr.getType() == DataType.Array) {
-			var original = ((ArrayValue) originalExpr).elements;
-			var index = indexExpr.asInteger();
+		switch (originalExpr.getType()) {
+			case Array: {
+				var original = ((ArrayValue) originalExpr).elements;
+				var index = indexExpr.asInteger();
 
-			if (index < 0) {
-				throw new RuntimeException("Index cannot be negative (" + index + ")");
+				if (index < 0) {
+					throw new RuntimeException("Index cannot be negative (" + index + ")");
+				}
+				if (index > original.length) {
+					throw new RuntimeException("Index cannot be greater than the array length (" + index + ")");
+				}
+
+				ExpressionValue[] ret;
+				if (index == original.length) {
+					// Special case: append the item to the array.
+					ret = Arrays.copyOf(original, original.length + 1);
+				} else {
+					ret = Arrays.copyOf(original, original.length);
+				}
+
+				ret[index] = newValue;
+
+				return new ArrayValue(ret);
 			}
-			if (index > original.length) {
-				throw new RuntimeException("Index cannot be greater than the array length (" + index + ")");
+			case Dictionary: {
+				var original = ((DictionaryValue) originalExpr).elements;
+				var ret = new HashMap<>(original);
+				ret.put(indexExpr, newValue);
+				return new DictionaryValue(ret);
 			}
-
-			ExpressionValue[] ret;
-			if (index == original.length) {
-				// Special case: append the item to the array.
-				ret = Arrays.copyOf(original, original.length + 1);
-			} else {
-				ret = Arrays.copyOf(original, original.length);
-			}
-
-			ret[index] = newValue;
-
-			return new ArrayValue(ret);
-		} else if (originalExpr.getType() == DataType.Dictionary) {
-			var original = ((DictionaryValue) originalExpr).elements;
-			var ret = new HashMap<>(original);
-			ret.put(indexExpr, newValue);
-			return new DictionaryValue(ret);
-		} else {
-			throw new ArgTypeException(args);
+			default:
+				throw new UnreachableCodeBlockException();
 		}
 	}
 
@@ -164,34 +167,37 @@ public class MultiTypeFunctions {
 		var originalExpr = args[0];
 		var indexExpr = args[1];
 
-		if (originalExpr.getType() == DataType.Array) {
-			var original = ((ArrayValue) originalExpr).elements;
-			var index = indexExpr.asInteger();
+		switch (originalExpr.getType()) {
+			case Array: {
+				var original = ((ArrayValue) originalExpr).elements;
+				var index = indexExpr.asInteger();
 
-			if (index < 0) {
-				throw new RuntimeException("Index cannot be negative (" + index + ")");
+				if (index < 0) {
+					throw new RuntimeException("Index cannot be negative (" + index + ")");
+				}
+				if (index >= original.length) {
+					throw new RuntimeException("Index must be smaller than the array length (" + index + ")");
+				}
+
+				if (index == original.length - 1) {
+					// Special case: truncate the array while copying it.
+					return new ArrayValue(Arrays.copyOf(original, original.length - 1));
+				}
+
+				var ret = new ExpressionValue[original.length - 1];
+				System.arraycopy(original, 0, ret, 0, index);
+				System.arraycopy(original, index + 1, ret, index, original.length - 1 - index);
+
+				return new ArrayValue(ret);
 			}
-			if (index >= original.length) {
-				throw new RuntimeException("Index must be smaller than the array length (" + index + ")");
+			case Dictionary: {
+				var original = ((DictionaryValue) originalExpr).elements;
+				var ret = new HashMap<>(original);
+				ret.remove(indexExpr);
+				return new DictionaryValue(ret);
 			}
-
-			if (index == original.length - 1) {
-				// Special case: truncate the array while copying it.
-				return new ArrayValue(Arrays.copyOf(original, original.length - 1));
-			}
-
-			var ret = new ExpressionValue[original.length - 1];
-			System.arraycopy(original, 0, ret, 0, index);
-			System.arraycopy(original, index + 1, ret, index, original.length - 1 - index);
-
-			return new ArrayValue(ret);
-		} else if (originalExpr.getType() == DataType.Dictionary) {
-			var original = ((DictionaryValue) originalExpr).elements;
-			var ret = new HashMap<>(original);
-			ret.remove(indexExpr);
-			return new DictionaryValue(ret);
-		} else {
-			throw new ArgTypeException(args);
+			default:
+				throw new UnreachableCodeBlockException();
 		}
 	}
 
@@ -218,30 +224,33 @@ public class MultiTypeFunctions {
 		}
 
 		// Actual range code.
-		if (original.getType() == DataType.String) {
-			var originalString = original.toString();
-			if (startInt == endInt || startInt >= originalString.length()) {
-				return new StringValue("");
-			}
+		switch (original.getType()) {
+			case String: {
+				var originalString = original.toString();
+				if (startInt == endInt || startInt >= originalString.length()) {
+					return new StringValue("");
+				}
 
-			if (endInt > originalString.length()) {
-				return new StringValue(originalString.substring(startInt));
-			} else {
-				return new StringValue(originalString.substring(startInt, endInt));
+				if (endInt > originalString.length()) {
+					return new StringValue(originalString.substring(startInt));
+				} else {
+					return new StringValue(originalString.substring(startInt, endInt));
+				}
 			}
-		} else if (original.getType() == DataType.Array) {
-			var originalArray = (ArrayValue) original;
-			if (startInt == endInt || startInt >= originalArray.elements.length) {
-				return new ArrayValue(new ExpressionValue[]{});
-			}
+			case Array: {
+				var originalArray = (ArrayValue) original;
+				if (startInt == endInt || startInt >= originalArray.elements.length) {
+					return new ArrayValue(new ExpressionValue[]{});
+				}
 
-			if (endInt > originalArray.elements.length) {
-				endInt = originalArray.elements.length;
+				if (endInt > originalArray.elements.length) {
+					endInt = originalArray.elements.length;
+				}
+				var newArray = Arrays.copyOfRange(originalArray.elements, startInt, endInt);
+				return new ArrayValue(newArray);
 			}
-			var newArray = Arrays.copyOfRange(originalArray.elements, startInt, endInt);
-			return new ArrayValue(newArray);
-		} else {
-			throw new ArgTypeException(args);
+			default:
+				throw new UnreachableCodeBlockException();
 		}
 	}
 
@@ -251,38 +260,41 @@ public class MultiTypeFunctions {
 		var original = args[0];
 		var target = args[1];
 
-		if (original.getType() == DataType.String) {
-			var originalString = original.toString();
-			var targetString = target.toString();
+		switch (original.getType()) {
+			case String: {
+				var originalString = original.toString();
+				var targetString = target.toString();
 
-			if (range.start >= originalString.length()) {
-				return new IntegerValue(-1);
-			}
-			var newStringStartIndex = (originalString.indexOf(targetString, range.start));
-			if (newStringStartIndex < 0) {
-				return new IntegerValue(-1);
-			}
-			if (newStringStartIndex >= range.end) {
-				return new IntegerValue(-1);
-			}
-			return new IntegerValue(newStringStartIndex);
-		} else if (original.getType() == DataType.Array) {
-			var originalArray = (ArrayValue) original;
-			if (range.start >= originalArray.elements.length) {
-				return new IntegerValue(-1);
-			}
-			if (range.end > originalArray.elements.length) {
-				range.end = originalArray.elements.length;
-			}
-			for (int i = range.start; i < range.end; i++) {
-				var currentElement = originalArray.elements[i];
-				if (currentElement.equals(target)) {
-					return new IntegerValue(i);
+				if (range.start >= originalString.length()) {
+					return new IntegerValue(-1);
 				}
+				var newStringStartIndex = (originalString.indexOf(targetString, range.start));
+				if (newStringStartIndex < 0) {
+					return new IntegerValue(-1);
+				}
+				if (newStringStartIndex >= range.end) {
+					return new IntegerValue(-1);
+				}
+				return new IntegerValue(newStringStartIndex);
 			}
-			return new IntegerValue(-1);
-		} else {
-			throw new ArgTypeException(args);
+			case Array: {
+				var originalArray = (ArrayValue) original;
+				if (range.start >= originalArray.elements.length) {
+					return new IntegerValue(-1);
+				}
+				if (range.end > originalArray.elements.length) {
+					range.end = originalArray.elements.length;
+				}
+				for (int i = range.start; i < range.end; i++) {
+					var currentElement = originalArray.elements[i];
+					if (currentElement.equals(target)) {
+						return new IntegerValue(i);
+					}
+				}
+				return new IntegerValue(-1);
+			}
+			default:
+				throw new UnreachableCodeBlockException();
 		}
 	}
 
@@ -293,39 +305,42 @@ public class MultiTypeFunctions {
 		var target = args[1];
 		var foundIndecies = new ArrayList<Integer>();
 
-		if (original.getType() == DataType.String) {
-			var originalString = original.toString();
-			var targetString = target.toString();
+		switch (original.getType()) {
+			case String: {
+				var originalString = original.toString();
+				var targetString = target.toString();
 
-			if (range.start >= originalString.length()) {
-				return new ArrayValue(new ExpressionValue[]{});
-			}
-			if (range.end > originalString.length()) {
-				range.end = originalString.length();
-			}
-			var currentIndex = originalString.indexOf(targetString, range.start);
-			while (currentIndex < range.end && currentIndex >= 0) {
-				foundIndecies.add(currentIndex);
-				currentIndex = originalString.indexOf(targetString, currentIndex + 1);
-			}
-
-		} else if (original.getType() == DataType.Array) {
-			var originalArray = ((ArrayValue) original).elements;
-
-			if (range.start >= originalArray.length) {
-				return new ArrayValue(new ExpressionValue[]{});
-			}
-			if (range.end > originalArray.length) {
-				range.end = originalArray.length;
-			}
-			for (int i = range.start; i < range.end; i++) {
-				if (target.equals(originalArray[i])) {
-					foundIndecies.add(i);
+				if (range.start >= originalString.length()) {
+					return new ArrayValue(new ExpressionValue[]{});
 				}
+				if (range.end > originalString.length()) {
+					range.end = originalString.length();
+				}
+				var currentIndex = originalString.indexOf(targetString, range.start);
+				while (currentIndex < range.end && currentIndex >= 0) {
+					foundIndecies.add(currentIndex);
+					currentIndex = originalString.indexOf(targetString, currentIndex + 1);
+				}
+				break;
 			}
+			case Array: {
+				var originalArray = ((ArrayValue) original).elements;
 
-		} else {
-			throw new ArgTypeException(args);
+				if (range.start >= originalArray.length) {
+					return new ArrayValue(new ExpressionValue[]{});
+				}
+				if (range.end > originalArray.length) {
+					range.end = originalArray.length;
+				}
+				for (int i = range.start; i < range.end; i++) {
+					if (target.equals(originalArray[i])) {
+						foundIndecies.add(i);
+					}
+				}
+				break;
+			}
+			default:
+				throw new UnreachableCodeBlockException();
 		}
 
 		var ret = new ExpressionValue[foundIndecies.size()];
