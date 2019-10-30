@@ -50,7 +50,13 @@ public class DictionaryValue implements ExpressionValue {
 			}
 
 			builder.append(": ");
-			builder.append(value.toString());
+			if (value.getType() == DataType.String) {
+				builder.append('"');
+				builder.append(value.toString());
+				builder.append('"');
+			} else {
+				builder.append(value.toString());
+			}
 		}
 		builder.append('}');
 		return builder.toString();

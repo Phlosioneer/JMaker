@@ -40,11 +40,17 @@ public class ArrayValue implements ExpressionValue {
 		builder.append('[');
 
 		if (elements.length > 0) {
-			builder.append(elements[0].toString());
+			if (elements[0].getType() == DataType.String) {
+				builder.append('"');
+				builder.append(elements[0].toString());
+				builder.append('"');
+			} else {
+				builder.append(elements[0].toString());
+			}
 		}
 
 		for (int i = 1; i < elements.length; i++) {
-			builder.append(",");
+			builder.append(", ");
 			var cast = elements[i].toString();
 			if (elements[i].getType() == DataType.String) {
 				builder.append('"');

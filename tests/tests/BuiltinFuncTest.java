@@ -71,6 +71,10 @@ class BuiltinFuncTest {
 		assertEquals(new IntegerValue(111), out);
 		out = runProgram("out = call(call, [parseDouble, [\"3.14\"]]);");
 		assertEquals(new DoubleValue(3.14), out);
+
+		out = runProgram("out = toString(3);");
+		assertEquals(new StringValue("3"), out);
+
 	}
 
 	@Test

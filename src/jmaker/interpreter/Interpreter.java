@@ -288,7 +288,7 @@ public class Interpreter {
 		}
 
 		// Adding strings converts the other value to a string.
-		if (left.getType() == DataType.String || right.getType() == DataType.String) {
+		if (op == BinaryOperator.ADD && (left.getType() == DataType.String || right.getType() == DataType.String)) {
 			return new StringValue(left.toString() + right.toString());
 		}
 

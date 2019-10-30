@@ -25,6 +25,11 @@ public class BooleanValue implements ExpressionValue, Expression {
 	}
 
 	@Override
+	public boolean asBoolean() {
+		return value;
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(value);
 	}

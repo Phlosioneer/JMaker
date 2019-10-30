@@ -8,6 +8,7 @@ import jmaker.interpreter.ExpressionValue;
 import jmaker.interpreter.FunctionValue;
 import jmaker.interpreter.IntegerValue;
 import jmaker.interpreter.Memory;
+import jmaker.interpreter.StringValue;
 import jmaker.runtime.NativeFunction.SigType;
 
 public class TypeFunctions {
@@ -41,6 +42,9 @@ public class TypeFunctions {
 		}),
 		new NativeFunction("call", TypeFunctions::callFunction, new SigType[]{
 			SigType.Function, SigType.Array
+		}),
+		new NativeFunction("toString", TypeFunctions::castToString, new SigType[]{
+			SigType.Any
 		})
 	};
 
@@ -95,5 +99,9 @@ public class TypeFunctions {
 		var functionArgs = ((ArrayValue) args[1]).elements;
 
 		return function.call(functionArgs);
+	}
+
+	public static ExpressionValue castToString(ExpressionValue[] args) {
+		return new StringValue(args[0].toString());
 	}
 }

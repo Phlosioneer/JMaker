@@ -56,6 +56,7 @@
 * `Bool isFunction(Any value)`
 * `Integer parseInt(String value)`
 * `Double parseDouble(String value)`
+* `String toString(Any value)`
 
 ### Math
 
