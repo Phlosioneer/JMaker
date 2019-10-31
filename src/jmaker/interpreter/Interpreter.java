@@ -170,7 +170,7 @@ public class Interpreter {
 			var symbol = (Symbol) expression;
 			var ret = memory.get(symbol.name);
 			if (ret == null) {
-				throw new RuntimeException("No function or variable named " + ret + " was found in the current scope.");
+				throw new RuntimeException("No function or variable named " + symbol.name + " was found in the current scope.");
 			}
 			return ret;
 		}

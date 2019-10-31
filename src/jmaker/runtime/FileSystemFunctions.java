@@ -10,28 +10,49 @@ import jmaker.interpreter.DataType;
 import jmaker.interpreter.ExpressionValue;
 import jmaker.interpreter.Memory;
 import jmaker.interpreter.StringValue;
+import jmaker.runtime.NativeFunction.SigType;
 
 public class FileSystemFunctions {
 	private static char pathSeparator;
 	private static boolean pathSeparatorInitialized = false;
 
 	private static NativeFunction[] functions = {
-		new NativeFunction("isValidPath", FileSystemFunctions::isValidPath),
-		new NativeFunction("isFile", FileSystemFunctions::isFile),
-		new NativeFunction("isDirectory", FileSystemFunctions::isDirectory),
-		new NativeFunction("getExtension", FileSystemFunctions::getExtension),
-		new NativeFunction("splitPath", FileSystemFunctions::splitPath),
-		new NativeFunction("getParentDir", FileSystemFunctions::getParentDir),
-		new NativeFunction("getAbsolutePath", FileSystemFunctions::getAbsolutePath),
-		new NativeFunction("getChildren", FileSystemFunctions::getChildren),
-		new NativeFunction("canRead", FileSystemFunctions::canRead),
-		new NativeFunction("canWrite", FileSystemFunctions::canWrite),
-		new NativeFunction("getCurrentWorkingDir", FileSystemFunctions::getCurrentWorkingDir),
-		new NativeFunction("getPathSeparator", FileSystemFunctions::getPathSeparator),
+		new NativeFunction("isValidPath", FileSystemFunctions::isValidPath, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("isFile", FileSystemFunctions::isFile, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("isDirectory", FileSystemFunctions::isDirectory, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("getExtension", FileSystemFunctions::getExtension, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("splitPath", FileSystemFunctions::splitPath, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("getParentDir", FileSystemFunctions::getParentDir, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("getAbsolutePath", FileSystemFunctions::getAbsolutePath, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("getChildren", FileSystemFunctions::getChildren, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("canRead", FileSystemFunctions::canRead, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("canWrite", FileSystemFunctions::canWrite, new SigType[]{
+			SigType.String
+		}),
+		new NativeFunction("getCurrentWorkingDir", FileSystemFunctions::getCurrentWorkingDir, new SigType[]{}),
+		new NativeFunction("getPathSeparator", FileSystemFunctions::getPathSeparator, new SigType[]{}),
 		new NativeFunction("joinPath", FileSystemFunctions::joinPath)
 	};
 
-	private static char getPathSeparatorFromRuntime() {
+	public static char getPathSeparatorFromRuntime() {
 		if (pathSeparatorInitialized) {
 			return pathSeparator;
 		}
@@ -47,57 +68,27 @@ public class FileSystemFunctions {
 	}
 
 	public static ExpressionValue isValidPath(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
 
 		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path != null);
 	}
 
 	public static ExpressionValue isFile(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
 
 		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path.toFile().isFile());
 	}
 
 	public static ExpressionValue isDirectory(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
-
 		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path.toFile().isDirectory());
 	}
 
 	public static ExpressionValue getExtension(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
-
 		var path = stringToPath(pathExpr.toString());
 		var filename = path.getFileName().toString();
 		var extensionIndex = filename.indexOf('.');
@@ -109,15 +100,7 @@ public class FileSystemFunctions {
 	}
 
 	public static ExpressionValue splitPath(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
-
 		var path = stringToPath(pathExpr.toString());
 		var ret = new ArrayList<ExpressionValue>();
 		for (var part : path) {
@@ -127,44 +110,20 @@ public class FileSystemFunctions {
 	}
 
 	public static ExpressionValue getParentDir(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
-
 		var path = stringToPath(pathExpr.toString());
 		var absolutePath = path.toAbsolutePath();
 		return new StringValue(absolutePath.getParent().toString());
 	}
 
 	public static ExpressionValue getAbsolutePath(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
-
 		var path = stringToPath(pathExpr.toString());
 		return new StringValue(path.toAbsolutePath().toString());
 	}
 
 	public static ExpressionValue getChildren(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
-
 		var path = stringToPath(pathExpr.toString());
 		var dir = path.toFile();
 		if (!dir.isDirectory()) {
@@ -179,48 +138,26 @@ public class FileSystemFunctions {
 	}
 
 	public static ExpressionValue canRead(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
-
 		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path.toFile().canRead());
 	}
 
 	public static ExpressionValue canWrite(ExpressionValue[] args) {
-		if (args.length != 1) {
-			throw new ArgCountException(1, args.length);
-		}
-
 		var pathExpr = args[0];
-		if (pathExpr.getType() != DataType.String) {
-			throw new ArgTypeException(args);
-		}
-
 		var path = stringToPath(pathExpr.toString());
 		return new BooleanValue(path.toFile().canWrite());
 	}
 
 	public static ExpressionValue getCurrentWorkingDir(ExpressionValue[] args) {
-		if (args.length != 0) {
-			throw new ArgCountException(0, args.length);
-		}
-
+		var pathExpr = args[0];
 		var workingDir = System.getProperty("user.dir");
 		return new StringValue(workingDir);
 	}
 
 	public static ExpressionValue getPathSeparator(ExpressionValue[] args) {
-		if (args.length != 0) {
-			throw new ArgCountException(0, args.length);
-		}
-
-		return new StringValue(Character.toString(pathSeparator));
+		var pathExpr = args[0];
+		return new StringValue(Character.toString(getPathSeparatorFromRuntime()));
 	}
 
 	public static ExpressionValue joinPath(ExpressionValue[] args) {
