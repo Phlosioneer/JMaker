@@ -189,13 +189,6 @@ class LexerTest {
 	}
 
 	@Test
-	void testBadSymbols() {
-		assertThrows(RuntimeException.class, ()->new Lexer("true & false").scanAll());
-		assertThrows(RuntimeException.class, ()->new Lexer("true | false").scanAll());
-		assertThrows(RuntimeException.class, ()->new Lexer("^").scanAll());
-	}
-
-	@Test
 	void testBadStrings() {
 		assertThrows(RuntimeException.class, ()->new Lexer("\"end of file terminated").scanAll());
 		assertThrows(RuntimeException.class, ()->new Lexer("\"bad escape:\\y\"").scanAll());

@@ -7,7 +7,10 @@
 
 file = ( statement )*
 # NOTE: Statements cannot begin with a dictionary literal. See bottom of file.
-statement = assignment | if | while | for | rule | ( ">" )? expression ";" | block
+statement = assignment | if | while | for | rule | ( ">" )? expression ";" | block | functionDef
+
+functionDef = "function" "(" functionDefArgList ")" block
+functionDefArgList = ( name ( "*" )? ( "," name ( "*" )? )* )?
 
 # Variables
 assignment = name "=" expression ";"
@@ -46,10 +49,11 @@ comparison = addSub ( ( "<" | "<=" | ">" | ">=" ) addSub )? # Can't be chained
 addSub = multDiv ( ( "-" | "+" ) multDiv )*
 multDiv = unary ( ( "*" | "/" ) unary )*
 unary = ( ( "!" | "-" ) unary ) | primary
-primary = literal | "(" expression ")" ( index | args )? | name ( index | args )?
+primary = literal | "(" expression ")" ( index | args )? | name ( index | args )? | lambda
 literal = NUMBER | STRING | "true" | "false" | arrayLiteral | dictLiteral
 args = "(" expressionList ")"
 index = ( "[" expression "]" )+
+lambda = ( name | "(" ( name ( "," name )* )? ")" ) "->" ( expression | block )
 
 # If a statement is a block, then a line starting with "{" is ambiguous. It could be
 # a block, or it could be a literal dictionary. The lookahead is very expensive and complex.

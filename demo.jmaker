@@ -1,0 +1,101 @@
+// Demo jmaker file for a simple java game, using tiled for maps and SVG's for art.
+// It also uses some external libs, downloaded from Maven Central.
+// There's also a custom tool to generate java glue code from a Tiled map.
+
+mavenDeps = {
+	"gson": {
+		"groupId": "com.google.code.gson",
+		"artifactId": "gson",
+		"version": "2.8.6"
+	},
+	// For unit tests
+	"junit": {
+		"groupId": "org.junit.jupiter",
+		"artifactId": "junit-jupiter-engine",
+		"version": "5.3.1"
+	},
+	// For code coverage
+	"jacoco": {
+		"groupId": "org.jacoco",
+		"artifactId": "org.jacoco.cli",
+		"version": "0.8.5"
+	}
+};
+
+configurations = [
+	{
+		"runTargetName": "normal",
+		"buildTargetName": "normalBuild",
+		"dirs": "src",
+		"maven": mavenDeps["gson"],
+		"mainClass": "jmaker.main.JMaker",
+		"outDir": "bin"
+	},
+	{
+		"runTargetName": "test",
+		"buildTargetName": "testBuild",
+		"dirs": ["src", "tests"],
+		"maven": mavenDeps["gson", "junit", "jacoco"]
+		"outDir": "bin"
+	}
+];
+
+>> javaRules(configurations);
+
+// Inkscape svg->png
+{
+	inkscapeEXE = "D:/NewProgramFiles/Inkscape/inkscape.exe";
+	
+	["normal", "test"]: "resources/tileset.png" { super(); }
+	
+	"resources/tileset.png": "resources/tileset.svg" {
+		> inkscapeEXE ++ "-z" ++ target ++ "-e" ++ dep;
+	}
+}
+
+// Java codegen
+{
+	tiledToJava = "java -jar tiledToJava.jar";
+	
+	generatedJavaFiles = ["mainMap.java", "ui.java", "level1.java", "level2.java"];
+	
+	["normal", "test"]: generatedJavaFiles { super(); }
+	"src/generated/*.java": "resources/*.tmx" {
+		> tiledToJava ++ dep ++ "-o" ++ target;
+	}
+}
+
+
+
+/////////////////////////////////////////////////////////////////////
+// Java include file / plugin / import
+
+function javaRules(runTargetName, buildTargetName, dirs, maven, mainClass, outDir) {
+	>> libs = mavenRules(maven);
+
+	sourceFiles = findFiles(dirs, extension = ".java", recurse = true);
+	classFiles = changeExt(sourceFiles, ".java", ".class") | changeRoot(dirs, outDir);
+	copiedLibs = libs.map(lib -> outDir + lib);
+	
+	classPath = joinArray(dirs, ";");
+	
+	buildTargetName, classFiles: sourceFiles, libs {
+		> "javac" ++ sourceFiles ++ "-cp" ++ quote(classPath) ++ "-d" ++ outDir;
+	}
+	
+	copiedLibs: libs {
+		> "cp" ++ dep ++ target;
+	}
+	
+	runTargetName: classFiles, copiedLibs {
+		> "java -cp" ++ outDir ++ mainClass;
+	}
+}
+
+function mavenRules(groupId, artifactId, version) {
+	// ???
+	// something like:
+	//
+	// libJar: { download(lib); downloadAllDeps(lib); }
+	// return libJar;
+}

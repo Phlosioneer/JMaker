@@ -2,7 +2,6 @@ package jmaker.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import tests.TestUtil;
 
 public class Block {
 	public final Statement[] statements;
@@ -13,11 +12,6 @@ public class Block {
 
 	public Block(Statement[] statements) {
 		this.statements = statements;
-	}
-
-	@Override
-	public String toString() {
-		return TestUtil.arrayToString(statements);
 	}
 
 	@Override

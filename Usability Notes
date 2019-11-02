@@ -1,0 +1,41 @@
+Usability Notes
+
+* Need much more robust array support in all built-in functions
+* Need ability to pipe 1st arg between functions
+* Paths should be a 1st class type, not just a string
+* For-each `for (myVar = myArray) {...}` / `for (key, value = myDict) {...}`
+  * Need assignment destructuring
+* Better understanding of "need to build gropu of things simultaneously".
+* Concatenate vs Concatenate-with-at-least-one-space
+* Commands need to be a first-class type, that can be stored and used and put in arrays.
+* Rules that can "inherit" other rules.
+  * Rules get the special function `super()`, which means "continue looking for a rule to apply,
+    then when that's done, resume running this rule." This gives an easy and extensible way to
+    append dependencies to rules, and to have rules for specific cases without messing with
+    more general rules.
+* Import/include and namespaces
+  * Learn from python: don't rely on file names and folders for namespacing rules!
+* User-defined functions
+* Named Parameters
+  * Can use a dictionary as named parameters
+* Array indexing using ranges, python-style
+* Try function for error handling: `try(expression, return-value-if-error)`
+* Notation for phony targets.
+* Save all rules defined by subfunction without requiring some kind of "return rule" thing.
+  * Something like ">>(varname)", save rules in `varname`?
+* Some internet functions, like downloading.
+* Parsing common config file formats, like JSON and XML.
+* Lambda expressions
+* Map, filter, etc. for arrays.
+
+------------------------------------------------------------------------------
+Functionality Goals
+
+* Replace arbitrary Makefiles
+* Replace Gradle
+* Replace CMake
+* Replace conf / autoconf
+* Replace most custom build scripts
+* NOT a package manager - will not replace cargo, npm, pip, etc.
+* Built-in friendly error messages
+* Built-in help (like cargo/rustc)

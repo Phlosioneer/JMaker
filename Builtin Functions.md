@@ -83,6 +83,12 @@
 * `String getPathSeparator()`
 * `String joinPath(Array subPaths)`
 * `String joinPath(String subPath, String subPath, ...)`
+TODO: * `Array findFiles(String rootDir, String pattern, Bool recurse)` replacement 
+  for `wildcard`
+TODO: * `Array changeExt(Array paths, String newExtension)` partial replacement for 
+  patsubst
+TODO: * `Array changePathParts(Array originalPaths, String oldRootPath, String newRootPath)` 
+  partial replacement for patsubst
 
 ### Shell
 

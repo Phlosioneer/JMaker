@@ -45,8 +45,6 @@ public class Lexer {
 				return new Token(c, TokenType.BRACKET_RIGHT);
 			case ',':
 				return new Token(c, TokenType.COMMA);
-			case '-':
-				return new Token(c, TokenType.MINUS);
 			case '+':
 				return new Token(c, TokenType.PLUS);
 			case ';':
@@ -59,6 +57,18 @@ public class Lexer {
 				return new Token(c, TokenType.CURL_LEFT);
 			case '}':
 				return new Token(c, TokenType.CURL_RIGHT);
+			case '.':
+				if (!Character.isDigit(peek())) {
+					return new Token(".", TokenType.DOT);
+				}
+				break;
+			case '-':
+				if (peek() == '>') {
+					getNextChar();
+					return new Token("->", TokenType.ARROW_LEFT);
+				} else {
+					return new Token(c, TokenType.MINUS);
+				}
 			case '&':
 				if (peek() == '&') {
 					getNextChar();
@@ -69,8 +79,9 @@ public class Lexer {
 				if (peek() == '|') {
 					getNextChar();
 					return new Token("||", TokenType.DOUBLE_OR);
+				} else {
+					return new Token("|", TokenType.PIPE);
 				}
-				break;
 			case '<':
 				if (peek() == '=') {
 					getNextChar();
@@ -177,6 +188,9 @@ public class Lexer {
 		}
 		if (finalString.equals("false")) {
 			return new Token(finalString, TokenType.FALSE);
+		}
+		if (finalString.equals("function")) {
+			return new Token(finalString, TokenType.FUNCTION);
 		}
 		return new Token(ret.toString(), TokenType.NAME);
 	}
