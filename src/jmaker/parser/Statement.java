@@ -15,17 +15,18 @@ public class Statement {
 	}
 
 	public static class ExpressionStatement extends Statement {
+		// Can be null if kind == RETURN.
 		public final Expression expression;
-		public final boolean isCommand;
+		public final ExpressionStatementKind kind;
 
-		public ExpressionStatement(Expression expression, boolean isCommand) {
+		public ExpressionStatement(Expression expression, ExpressionStatementKind kind) {
 			this.expression = expression;
-			this.isCommand = isCommand;
+			this.kind = kind;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(expression, isCommand);
+			return Objects.hash(expression, kind);
 		}
 
 		@Override
@@ -37,7 +38,7 @@ public class Statement {
 				return false;
 			}
 			ExpressionStatement other = (ExpressionStatement) obj;
-			return Objects.equals(expression, other.expression) && isCommand == other.isCommand;
+			return Objects.equals(expression, other.expression) && kind == other.kind;
 		}
 	}
 
@@ -227,6 +228,45 @@ public class Statement {
 			}
 			Rule other = (Rule) obj;
 			return Objects.equals(block, other.block) && Arrays.equals(dependencies, other.dependencies) && Arrays.equals(targets, other.targets);
+		}
+	}
+
+	public static class FunctionDefinition extends Statement {
+		public final Symbol[] argNames;
+		public final int pipeArg;
+		public final Symbol functionName;
+		public final Block block;
+
+		public FunctionDefinition(Symbol functionName, Symbol[] argNames, int pipeArg, Block block) {
+			this.pipeArg = pipeArg;
+			if (argNames == null) {
+				this.argNames = new Symbol[0];
+			} else {
+				this.argNames = argNames;
+			}
+			this.functionName = functionName;
+			this.block = block;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + Arrays.hashCode(argNames);
+			result = prime * result + Objects.hash(block, functionName, pipeArg);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof FunctionDefinition)) {
+				return false;
+			}
+			FunctionDefinition other = (FunctionDefinition) obj;
+			return Arrays.equals(argNames, other.argNames) && Objects.equals(block, other.block) && Objects.equals(functionName, other.functionName) && pipeArg == other.pipeArg;
 		}
 	}
 

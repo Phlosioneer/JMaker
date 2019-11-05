@@ -1,6 +1,7 @@
 package tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import jmaker.interpreter.BooleanValue;
 import jmaker.interpreter.DoubleValue;
@@ -9,378 +10,166 @@ import jmaker.interpreter.StringValue;
 import jmaker.parser.BinaryOperator;
 import jmaker.parser.Block;
 import jmaker.parser.Expression;
-import jmaker.parser.Lexer;
-import jmaker.parser.Parser;
+import jmaker.parser.ExpressionStatementKind;
 import jmaker.parser.Statement;
+import jmaker.parser.UnaryOperator;
 
 class ParserTest {
 
 	@Test
-	void testFile1() {
-		var input = TestUtil.readFile("parserTest1.txt");
-		var lexer = new Lexer(input);
-		var parser = new Parser(lexer.scanAll());
-		var output = parser.parseFile();
-
-		var expectedTree = new Block(new Statement[]{
-			new Statement.Assignment(
-					//
-					new Expression.Symbol("TEST"),
-					//
-					new IntegerValue(2)),
-			new Statement.Rule(
-					//
-					new Expression[]{
-						new StringValue("foo.class")
-					},
-					//
-					new Expression[]{
-						new StringValue("foo.java")
-					},
-					//
-					new Block(new Statement[]{
-						new Statement.ExpressionStatement(
-								//
-								new Expression.Binary(
-										//
-										new Expression.Binary(
-												//
-												new Expression.Binary(
-														//
-														new StringValue("javac "),
-														//
-														BinaryOperator.ADD,
-														//
-														new Expression.Index(
-																//
-																new Expression.Symbol("deps"),
-																//
-																new IntegerValue(0))),
-												//
-												BinaryOperator.ADD,
-												//
-												new StringValue(" -o ")),
-										//
-										BinaryOperator.ADD,
-										//
-										new Expression.Index(
-												//
-												new Expression.Symbol("targets"),
-												//
-												new IntegerValue(0))),
-								//
-								true)
-					}))
-		});
-
-		assertEquals(expectedTree, output);
-	}
-
-	@Test
-	void testFile2() {
-		var input = TestUtil.readFile("parserTest2.txt");
-		var lexer = new Lexer(input);
-		var parser = new Parser(lexer.scanAll());
-		var output = parser.parseFile();
-
-		var expectedTree = new Block(new Statement[]{
-			new Statement.If(
-					//
-					new Expression[]{
-						new BooleanValue(true),
-						new Expression.Binary(
-								//
-								new Expression.Binary(
-										//
-										new IntegerValue(6),
-										//
-										BinaryOperator.ADD,
-										//
-										new IntegerValue(2)),
-								//
-								BinaryOperator.EQUAL,
-								//
-								new IntegerValue(8))
-					},
-					//
-					new Block[]{
-						new Block(new Statement[]{
-							new Statement.Assignment(
-									//
-									new Expression.Symbol("var1"),
-									//
-									new StringValue("hello"))
-						}),
-						new Block(new Statement[]{
-							new Statement.Assignment(
-									//
-									new Expression.Symbol("var1"),
-									//
-									new IntegerValue(253))
-						})
-					},
-					//
-					new Block(new Statement[]{
-						new Statement.If(
-								//
-								new Expression[]{
-									new BooleanValue(false)
-								},
-								//
-								new Block[]{
-									new Block(new Statement[]{
-										new Statement.Assignment(
-												//
-												new Expression.Symbol("var1"),
-												//
-												new Expression.Binary(
-														//
-														new DoubleValue(3.14),
-														//
-														BinaryOperator.ADD,
-														//
-														new IntegerValue(2)))
-									})
-								},
-								//
-								new Block(new Statement[]{
-									new Statement.Assignment(
-											//
-											new Expression.Symbol("var1"),
-											//
-											new Expression.Index(
-													//
-													new Expression.Index(
-															//
-															new Expression.Symbol("env"),
-															//
-															new StringValue("testArray")),
-													//
-													new IntegerValue(0)))
-								}))
-					})),
-			// Desugared for loop
-			new Statement.BlockStatement(new Block(new Statement[]{
-				new Statement.Assignment(
-						//
-						new Expression.Symbol("i"),
-						//
-						new IntegerValue(0)),
-				new Statement.WhileLoop(
-						//
-						new Expression.Binary(
-								//
-								new Expression.Symbol("i"),
-								//
-								BinaryOperator.LESS,
-								//
-								new IntegerValue(20)),
-						//
-						new Block(new Statement[]{
-							new Statement.Rule(
-									//
-									new Expression[]{
-										new Expression.Binary(
-												//
-												new Expression.Binary(
-														//
-														new StringValue("file"),
-														//
-														BinaryOperator.ADD,
-														//
-														new Expression.Symbol("i")),
-												//
-												BinaryOperator.ADD,
-												//
-												new StringValue(".txt"))
-									},
-									//
-									new Expression[]{},
-									//
-									new Block(new Statement[]{
-										new Statement.ExpressionStatement(
-												//
-												new Expression.Binary(
-														//
-														new Expression.Binary(
-																//
-																new Expression.Binary(
-																		//
-																		new StringValue("cat "),
-																		//
-																		BinaryOperator.ADD,
-																		//
-																		new Expression.Symbol("i")),
-																//
-																BinaryOperator.ADD,
-																//
-																new StringValue(" > ")),
-														//
-														BinaryOperator.ADD,
-														//
-														new Expression.Symbol("target")),
-												//
-												true)
-									})),
-							new Statement.Assignment(
-									//
-									new Expression.Symbol("i"),
-									//
-									new Expression.Binary(
-											//
-											new Expression.Symbol("i"),
-											//
-											BinaryOperator.ADD,
-											//
-											new IntegerValue(1)))
-						}))
-			})),
-			new Statement.WhileLoop(
-					//
-					new Expression.Binary(
-							//
-							new Expression.Symbol("var1"),
-							//
-							BinaryOperator.GREATER_EQUAL,
-							//
-							new IntegerValue(2)),
-					//
-					new Block(new Statement[]{
-						new Statement.ExpressionStatement(
-								//
-								new Expression.FunctionCall(
-										//
-										new Expression.Symbol("println"),
-										//
-										new Expression[]{
-											new StringValue("Hello World"),
-											new Expression.Symbol("var1")
-										}),
-								//
-								false),
-						new Statement.BlockStatement(new Block(new Statement[]{
-							new Statement.Assignment(
-									//
-									new Expression.Symbol("var1"),
-									//
-									new IntegerValue(0))
-						}))
-					}))
-		});
-
-		assertEquals(expectedTree, output);
-	}
-
-	@Test
 	void testEmptyStatement() {
-		var input = new Lexer(";");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+		var output = TestUtil.parseProgram(";");
 
-		var expectedTree = new Block(new Statement[]{
-			new Statement.Empty()
-		});
+		var expectedTree = new Block(new Statement[]{});
 
 		assertEquals(expectedTree, output);
 	}
 
-	@Test
-	void testRuleStartingWithName() {
-		var input = new Lexer("targetPath : \"foo.c\" {}");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+	// Helper for testNumbers
+	private static Block numberToBlock(int num) {
+		Expression inner;
+		if (num < 0) {
+			inner = new Expression.Unary(new IntegerValue(Math.abs(num)), UnaryOperator.NEGATE);
+		} else {
+			inner = new IntegerValue(Math.abs(num));
+		}
+		return TestUtil.expressionToBlock(inner);
+	}
 
-		var expectedTree = new Block(new Statement[]{
-			new Statement.Rule(
-					//
-					new Expression[]{
-						new Expression.Symbol("targetPath")
-					},
-					//
-					new Expression[]{
-						new StringValue("foo.c")
-					}, new Block(new Statement[]{}))
-		});
-
-		assertEquals(expectedTree, output);
+	// Helper for testNumbers
+	private static Block numberToBlock(double num) {
+		Expression inner;
+		if (num < 0) {
+			inner = new Expression.Unary(new DoubleValue(Math.abs(num)), UnaryOperator.NEGATE);
+		} else {
+			inner = new DoubleValue(Math.abs(num));
+		}
+		return TestUtil.expressionToBlock(inner);
 	}
 
 	@Test
-	void testExpressionNotStartingWithName() {
-		var input = new Lexer("2 + 2;");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+	void testNumbers() {
+		Block output;
 
-		var expectedTree = new Block(new Statement[]{
-			new Statement.ExpressionStatement(
-					//
-					new Expression.Binary(
-							//
-							new IntegerValue(2),
-							//
-							BinaryOperator.ADD,
-							//
-							new IntegerValue(2)),
-					//
-					false)
+		output = TestUtil.parseProgram("32;");
+		assertEquals(numberToBlock(32), output);
+		output = TestUtil.parseProgram("3448002;");
+		assertEquals(numberToBlock(3448002), output);
+		output = TestUtil.parseProgram("344_800_2;");
+		assertEquals(numberToBlock(3448002), output);
+		output = TestUtil.parseProgram("-2;");
+		assertEquals(numberToBlock(-2), output);
+		output = TestUtil.parseProgram("0;");
+		assertEquals(numberToBlock(0), output);
+
+		output = TestUtil.parseProgram("32.4;");
+		assertEquals(numberToBlock(32.4), output);
+		output = TestUtil.parseProgram("44224.8323;");
+		assertEquals(numberToBlock(44224.8323), output);
+		output = TestUtil.parseProgram("442_24.83_23;");
+		assertEquals(numberToBlock(44224.8323), output);
+		output = TestUtil.parseProgram("-0.2;");
+		assertEquals(numberToBlock(-0.2), output);
+		output = TestUtil.parseProgram("0.0;");
+		assertEquals(numberToBlock(0.0), output);
+	}
+
+	// Helper for testStrings
+	private static Block stringToBlock(String string) {
+		return TestUtil.expressionToBlock(new StringValue(string));
+	}
+
+	@Test
+	void testStrings() {
+		Block output;
+
+		output = TestUtil.parseProgram("\"foo\";");
+		assertEquals(stringToBlock("foo"), output);
+		output = TestUtil.parseProgram("'foo';");
+		assertEquals(stringToBlock("foo"), output);
+		output = TestUtil.parseProgram("\"he said \\\"foo\\\" not 'bar'.\";");
+		assertEquals(stringToBlock("he said \"foo\" not 'bar'."), output);
+		output = TestUtil.parseProgram("'he said \"foo\" not \\'bar\\'.';");
+		assertEquals(stringToBlock("he said \"foo\" not 'bar'."), output);
+
+		assertThrows(RuntimeException.class, ()-> {
+			TestUtil.parseProgram("'he said \\\"foo\\\" not \\'bar\\'.';");
+		});
+		assertThrows(RuntimeException.class, ()-> {
+			TestUtil.parseProgram("\"he said \\\"foo\\\" not \\'bar\\'.\";");
 		});
 
-		assertEquals(expectedTree, output);
+		output = TestUtil.parseProgram("\"newline\\n and tab\\t and windows\\r stuff\";");
+		assertEquals(stringToBlock("newline\n and tab\t and windows\r stuff"), output);
+		output = TestUtil.parseProgram("'byte\\x2B';");
+		assertEquals(stringToBlock("byte+"), output);
+		output = TestUtil.parseProgram("'unicode\\u002B';");
+		assertEquals(stringToBlock("unicode+"), output);
+		output = TestUtil.parseProgram("'backslash\\\\';");
+		assertEquals(stringToBlock("backslash\\"), output);
+
+		assertThrows(RuntimeException.class, ()-> {
+			TestUtil.parseProgram("'incomplete byte\\x2';");
+		});
+		assertThrows(RuntimeException.class, ()-> {
+			TestUtil.parseProgram("'incomplete unicode\\u';");
+		});
+
+		output = TestUtil.parseProgram("r'foobar \\n';");
+		assertEquals(stringToBlock("foobar \\n"), output);
+		output = TestUtil.parseProgram("r'fake escaped backslash\\\\';");
+		assertEquals(stringToBlock("fake escaped backslash\\\\"), output);
+		output = TestUtil.parseProgram("r'unusual escape \\f';");
+		assertEquals(stringToBlock("unusual escape \\f"), output);
+		output = TestUtil.parseProgram("r\"Escaped quote\\\" not escaped\\'\";");
+		assertEquals(stringToBlock("Escaped quote\" not escaped\\'"), output);
 	}
 
 	@Test
 	void testChainedLogicOperators() {
-		var input = new Lexer("true && b && false;true || b || false;");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+		Block output;
+		Block expectedTree;
 
-		var expectedTree = new Block(new Statement[]{
-			new Statement.ExpressionStatement(
-					//
-					new Expression.Binary(
-							//
-							//
-							new Expression.Binary(
-									//
-									new BooleanValue(true),
-									//
-									BinaryOperator.AND,
-									//
-									new Expression.Symbol("b")),
-							//
-							BinaryOperator.AND,
-							//
-							new BooleanValue(false)),
-					//
-					false),
-			new Statement.ExpressionStatement(
-					//
-					new Expression.Binary(
-							//
-							//
-							new Expression.Binary(
-									//
-									new BooleanValue(true),
-									//
-									BinaryOperator.OR,
-									//
-									new Expression.Symbol("b")),
-							//
-							BinaryOperator.OR,
-							//
-							new BooleanValue(false)),
-					//
-					false)
-		});
-
+		output = TestUtil.parseProgram("true && b && false;");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Binary(
+						//
+						//
+						new Expression.Binary(
+								//
+								new BooleanValue(true),
+								//
+								BinaryOperator.AND,
+								//
+								new Expression.Symbol("b")),
+						//
+						BinaryOperator.AND,
+						//
+						new BooleanValue(false)));
+		output = TestUtil.parseProgram("true || b || false;");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Binary(
+						//
+						//
+						new Expression.Binary(
+								//
+								new BooleanValue(true),
+								//
+								BinaryOperator.OR,
+								//
+								new Expression.Symbol("b")),
+						//
+						BinaryOperator.OR,
+						//
+						new BooleanValue(false)));
 		assertEquals(expectedTree, output);
 	}
 
 	@Test
 	void testElseIfWithoutFinalElse() {
-		var input = new Lexer("if (true) {\"foo\";} else if (false) {7;}");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+		var output = TestUtil.parseProgram("if (true) {\"foo\";} else if (false) {7;}");
 
 		var expectedTree = new Block(new Statement[]{
 			new Statement.If(
@@ -391,12 +180,8 @@ class ParserTest {
 					},
 					//
 					new Block[]{
-						new Block(new Statement[]{
-							new Statement.ExpressionStatement(new StringValue("foo"), false)
-						}),
-						new Block(new Statement[]{
-							new Statement.ExpressionStatement(new IntegerValue(7), false)
-						})
+						TestUtil.expressionToBlock(new StringValue("foo")),
+						TestUtil.expressionToBlock(new IntegerValue(7))
 					})
 		});
 
@@ -405,70 +190,127 @@ class ParserTest {
 
 	@Test
 	void testIndirectFunctionCall() {
-		var input = new Lexer("(foo[0])(\"bar\", 5 + 3);");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+		var output = TestUtil.parseProgram("(foo[0])(\"bar\", 5 + 3);");
 
-		var expectedTree = new Block(new Statement[]{
-			new Statement.ExpressionStatement(
-					//
-					new Expression.FunctionCall(
-							//
-							new Expression.Index(
+		var expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.FunctionCall(
+						//
+						new Expression.Index(
+								//
+								new Expression.Symbol("foo"),
+								//
+								new IntegerValue(0)),
+						//
+						new Expression[]{
+							new StringValue("bar"),
+							new Expression.Binary(
 									//
-									new Expression.Symbol("foo"),
+									new IntegerValue(5),
 									//
-									new IntegerValue(0)),
-							//
-							new Expression[]{
-								new StringValue("bar"),
-								new Expression.Binary(
-										//
-										new IntegerValue(5),
-										//
-										BinaryOperator.ADD,
-										//
-										new IntegerValue(3))
-							}),
-					//
-					false)
-		});
+									BinaryOperator.ADD,
+									//
+									new IntegerValue(3))
+						}));
 
 		assertEquals(expectedTree, output);
 	}
 
 	@Test
 	void testIndirectIndex() {
-		var input = new Lexer("(foo + bar)[\"baz\"];");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+		var output = TestUtil.parseProgram("(foo + bar)[\"baz\"];");
 
-		var expectedTree = new Block(new Statement[]{
-			new Statement.ExpressionStatement(
-					//
-					new Expression.Index(
-							//
-							new Expression.Binary(
-									//
-									new Expression.Symbol("foo"),
-									//
-									BinaryOperator.ADD,
-									//
-									new Expression.Symbol("bar")),
-							//
-							new StringValue("baz")),
-					//
-					false)
-		});
+		var expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Index(
+						//
+						new Expression.Binary(
+								//
+								new Expression.Symbol("foo"),
+								//
+								BinaryOperator.ADD,
+								//
+								new Expression.Symbol("bar")),
+						//
+						new StringValue("baz")));
 
 		assertEquals(expectedTree, output);
 	}
 
 	@Test
+	void testRangedIndex() {
+		Block output;
+		Block expectedTree;
+
+		output = TestUtil.parseProgram("foo[:];");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.IndexRange(new Expression.Symbol("foo"), null, null));
+		assertEquals(expectedTree, output);
+
+		output = TestUtil.parseProgram("foo[1 : 4];");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.IndexRange(
+						//
+						new Expression.Symbol("foo"),
+						//
+						new IntegerValue(1),
+						//
+						new IntegerValue(4)));
+		assertEquals(expectedTree, output);
+
+		output = TestUtil.parseProgram("foo[2:];");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.IndexRange(
+						//
+						new Expression.Symbol("foo"),
+						//
+						new IntegerValue(2),
+						//
+						null));
+		assertEquals(expectedTree, output);
+
+		output = TestUtil.parseProgram("foo[:5];");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.IndexRange(
+						//
+						new Expression.Symbol("foo"),
+						//
+						null,
+						//
+						new IntegerValue(5)));
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testChainedIndex() {
+		var output = TestUtil.parseProgram("foo[3]['bar'][2:5];");
+		var expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Index(
+						//
+						new Expression.Index(
+								//
+								new Expression.IndexRange(
+										//
+										new Expression.Symbol("foo"),
+										//
+										new IntegerValue(2),
+										//
+										new IntegerValue(5)),
+								//
+								new StringValue("bar")),
+						//
+						new IntegerValue(3)));
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
 	void testArrayLiteral() {
-		var input = new Lexer("[4, 2, true, []];");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+		var output = TestUtil.parseProgram("[4, 2, true, []];");
 
 		var expectedTree = new Block(new Statement[]{
 			new Statement.ExpressionStatement(
@@ -480,7 +322,7 @@ class ParserTest {
 						new Expression.Array(new Expression[]{})
 					}),
 					//
-					false)
+					ExpressionStatementKind.NORMAL)
 		});
 
 		assertEquals(expectedTree, output);
@@ -488,44 +330,35 @@ class ParserTest {
 
 	@Test
 	void testDictLiteral() {
-		// Note: Statements can't start with a dict literal
-		var input = new Lexer("0+{2: 2, \"foo\": bar, 2: baz, [fizz, 7.5]: {}};");
-		var parser = new Parser(input.scanAll());
-		var output = parser.parseFile();
+		var output = TestUtil.parseProgram("{2: 2, \"foo\": bar, 2: baz, [fizz, 7.5]: {}};");
 
 		var expectedTree = new Block(new Statement[]{
 			new Statement.ExpressionStatement(
 					//
-					new Expression.Binary(
+					new Expression.Dictionary(
 							//
-							new IntegerValue(0),
+							new Expression[]{
+								new IntegerValue(2),
+								new StringValue("foo"),
+								new IntegerValue(2),
+								new Expression.Array(new Expression[]{
+									new Expression.Symbol("fizz"),
+									new DoubleValue(7.5)
+								})
+							},
 							//
-							BinaryOperator.ADD,
-							//
-							new Expression.Dictionary(
-									//
-									new Expression[]{
-										new IntegerValue(2),
-										new StringValue("foo"),
-										new IntegerValue(2),
-										new Expression.Array(new Expression[]{
-											new Expression.Symbol("fizz"),
-											new DoubleValue(7.5)
-										})
-									},
-									//
-									new Expression[]{
-										new IntegerValue(2),
-										new Expression.Symbol("bar"),
-										new Expression.Symbol("baz"),
-										new Expression.Dictionary(
-												//
-												new Expression[]{},
-												//
-												new Expression[]{})
-									})),
+							new Expression[]{
+								new IntegerValue(2),
+								new Expression.Symbol("bar"),
+								new Expression.Symbol("baz"),
+								new Expression.Dictionary(
+										//
+										new Expression[]{},
+										//
+										new Expression[]{})
+							}),
 					//
-					false)
+					ExpressionStatementKind.NORMAL)
 		});
 
 		assertEquals(expectedTree, output);

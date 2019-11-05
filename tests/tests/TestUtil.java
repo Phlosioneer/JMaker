@@ -6,12 +6,19 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import codegen.JMakerLexer;
+import codegen.JMakerParser;
 import jmaker.interpreter.ArrayValue;
 import jmaker.interpreter.DataType;
 import jmaker.interpreter.ExpressionValue;
 import jmaker.interpreter.Interpreter;
-import jmaker.parser.Lexer;
-import jmaker.parser.Parser;
+import jmaker.parser.Block;
+import jmaker.parser.Expression;
+import jmaker.parser.ExpressionStatementKind;
+import jmaker.parser.Statement;
+import jmaker.parser.VisitorManager;
 
 public abstract class TestUtil {
 
@@ -42,15 +49,33 @@ public abstract class TestUtil {
 		return ret.toString();
 	}
 
+	public static Block parseProgram(String code) {
+		var chars = CharStreams.fromString(code);
+		var lexer = new JMakerLexer(chars);
+		var tokens = new CommonTokenStream(lexer);
+		var parser = new JMakerParser(tokens);
+		var rootBlock = new VisitorManager().visitAll(parser);
+		return rootBlock;
+	}
+
+	public static Block parseProgram(String[] code) {
+		var builder = new StringBuilder();
+		builder.append(code[0]);
+		for (int i = 1; i < code.length; i++) {
+			builder.append('\n');
+			builder.append(code[i]);
+		}
+		return parseProgram(builder.toString());
+	}
+
 	// Default outVar is "out".
 	public static ExpressionValue runProgram(String code) {
 		return runProgram(code, "out");
 	}
 
 	public static ExpressionValue runProgram(String code, String outVar) {
-		var lexer = new Lexer(code);
-		var parser = new Parser(lexer.scanAll());
-		var interpreter = new Interpreter(parser.parseFile());
+		var rootBlock = parseProgram(code);
+		var interpreter = new Interpreter(rootBlock);
 		interpreter.run();
 		var ret = interpreter.memory.get(outVar);
 		assertNotNull(ret, outVar + " wasn't defined");
@@ -133,5 +158,15 @@ public abstract class TestUtil {
 		message.append(", unexpected elements found: ");
 		message.append(unexpectedElements);
 		fail(message.toString());
+	}
+
+	public static Block statementToBlock(Statement statement) {
+		return new Block(new Statement[]{
+			statement
+		});
+	}
+
+	public static Block expressionToBlock(Expression expression) {
+		return statementToBlock(new Statement.ExpressionStatement(expression, ExpressionStatementKind.NORMAL));
 	}
 }

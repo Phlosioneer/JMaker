@@ -15,6 +15,7 @@ FUNCTION : 'function';
 TRUE : 'true';
 FALSE : 'false';
 VAR : 'var';
+RETURN : 'return';
 
 // Symbols
 
@@ -26,8 +27,8 @@ ANGLE_LEFT : '<';
 ANGLE_RIGHT : '>';
 CURL_LEFT : '{';
 CURL_RIGHT : '}';
-SINGLE_QUOTE : '\'';
-DOUBLE_QUOTE : '"';
+fragment SINGLE_QUOTE : '\'';
+fragment DOUBLE_QUOTE : '"';
 
 COMMA : ',';
 MINUS : '-';
@@ -57,32 +58,29 @@ PIPE_EQUAL : '||=';
 
 // Numbers
 
-DEC_INTEGER : [1-9] ('_'? [0-9])* | '0'+;
-//OCT_INTEGER : '0' [oO] [0-7] ('_'? [0-7])*;
-//HEX_INTEGER : '0' [xX] [0-9a-fA-F] ('_'? [0-9a-fA-F])*;
-//BIN_INTEGER : '0' [bB] [01] ('_'? [01])*;
+fragment DEC_INTEGER : [1-9] ('_'? [0-9])* | '0'+;
+//fragment OCT_INTEGER : '0' [oO] [0-7] ('_'? [0-7])*;
+//fragment HEX_INTEGER : '0' [xX] [0-9a-fA-F] ('_'? [0-9a-fA-F])*;
+//fragment BIN_INTEGER : '0' [bB] [01] ('_'? [01])*;
 
 INTEGER : DEC_INTEGER; // | OCT_INTEGER | HEX_INTEGER | BIN_INTEGER;
 
-DEC_FLOAT : DEC_INTEGER '.' [0-9] ('_'? [0-9])*;
-//OCT_FLOAT : OCT_INTEGER '.' [0-7] ('_'? [0-7])*;
-//HEX_FLOAT : HEX_INTEGER '.' [0-9a-fA-F] 
-//BIN_FLOAT : BIN_INTEGER '.' [01] ('_'? [01])*;
+fragment DEC_FLOAT : DEC_INTEGER '.' [0-9] ('_'? [0-9])*;
+//fragment OCT_FLOAT : OCT_INTEGER '.' [0-7] ('_'? [0-7])*;
+//fragment HEX_FLOAT : HEX_INTEGER '.' [0-9a-fA-F] 
+//fragment BIN_FLOAT : BIN_INTEGER '.' [01] ('_'? [01])*;
 
 FLOAT : DEC_FLOAT; // | OCT_FLOAT | HEX_FLOAT | BIN_FLOAT;
 
 // Strings
 
-fragment STRING_CHAR : ~[\\] | '\\' ESCAPE_SEQUENCE;
-fragment ESCAPE_SEQUENCE : ESCAPE_CHAR | UNICODE;
-fragment ESCAPE_CHAR : ["'"\\/nrt];
-fragment UNICODE : 'u' UNICODE_HEX UNICODE_HEX UNICODE_HEX UNICODE_HEX;
-fragment UNICODE_HEX : [0-9a-fA-F];
+fragment STRING_CHAR : (~'\\' | '\\' .);
+fragment NORMAL_STRING : [pP]? (SINGLE_QUOTE STRING_CHAR* SINGLE_QUOTE) | (DOUBLE_QUOTE STRING_CHAR* DOUBLE_QUOTE);
 
-NORMAL_STRING : (SINGLE_QUOTE STRING_CHAR* SINGLE_QUOTE) | (DOUBLE_QUOTE STRING_CHAR* DOUBLE_QUOTE);
-
-RAW_STRING : [rR] [pP] ((SINGLE_QUOTE ( ~'\\' | '\\' SINGLE_QUOTE | '\\' .)*? SINGLE_QUOTE)
-	| (DOUBLE_QUOTE ( ~'\\' | '\\' DOUBLE_QUOTE | '\\' .)*? DOUBLE_QUOTE));
+fragment RAW_STRING_CHAR_SINGLE : (~'\\' | '\\\''| '\\');
+fragment RAW_STRING_CHAR_DOUBLE : (~'\\' | '\\"' | '\\');
+fragment RAW_STRING : [rR] ((SINGLE_QUOTE RAW_STRING_CHAR_SINGLE*? SINGLE_QUOTE)
+	| (DOUBLE_QUOTE RAW_STRING_CHAR_DOUBLE*? DOUBLE_QUOTE));
 	
 STRING : NORMAL_STRING | RAW_STRING;
 

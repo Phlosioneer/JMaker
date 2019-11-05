@@ -12,6 +12,7 @@ import jmaker.interpreter.StringValue;
 import jmaker.parser.BinaryOperator;
 import jmaker.parser.Block;
 import jmaker.parser.Expression;
+import jmaker.parser.ExpressionStatementKind;
 import jmaker.parser.Statement;
 import jmaker.parser.UnaryOperator;
 
@@ -31,7 +32,7 @@ class CoverageTrick {
 		});
 
 		// The statements
-		new Statement.ExpressionStatement(dummyExpr, false).hashCode();
+		new Statement.ExpressionStatement(dummyExpr, ExpressionStatementKind.NORMAL).hashCode();
 		new Statement.Assignment(new Expression.Symbol("foo"), dummyExpr).hashCode();
 		new Statement.WhileLoop(dummyExpr, dummyBlock).hashCode();
 		new Statement.If(dummyExpr, dummyBlock).hashCode();

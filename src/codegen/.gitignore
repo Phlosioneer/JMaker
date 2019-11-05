@@ -4,3 +4,5 @@
 /JMakerParser.tokens
 /JMakerParserBaseListener.java
 /JMakerParserListener.java
+/JMakerLexer.interp
+/JMakerParser.interp

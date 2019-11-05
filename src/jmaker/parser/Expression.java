@@ -3,6 +3,7 @@ package jmaker.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import jmaker.parser.Statement.FunctionDefinition;
 
 public interface Expression {
 	public static class Array implements Expression {
@@ -212,6 +213,61 @@ public interface Expression {
 			}
 			Symbol other = (Symbol) obj;
 			return Objects.equals(name, other.name);
+		}
+	}
+
+	public static class Lambda implements Expression {
+		public final FunctionDefinition inner;
+
+		public Lambda(FunctionDefinition inner) {
+			this.inner = inner;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(inner);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof Lambda)) {
+				return false;
+			}
+			Lambda other = (Lambda) obj;
+			return Objects.equals(inner, other.inner);
+		}
+	}
+
+	public static class IndexRange implements Expression {
+		public final Expression inner;
+		// Start and End can be null.
+		public final Expression start;
+		public final Expression end;
+
+		public IndexRange(Expression inner, Expression start, Expression end) {
+			this.inner = inner;
+			this.start = start;
+			this.end = end;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(end, inner, start);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof IndexRange)) {
+				return false;
+			}
+			IndexRange other = (IndexRange) obj;
+			return Objects.equals(end, other.end) && Objects.equals(inner, other.inner) && Objects.equals(start, other.start);
 		}
 	}
 }

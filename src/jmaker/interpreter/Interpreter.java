@@ -10,6 +10,7 @@ import jmaker.parser.Expression.FunctionCall;
 import jmaker.parser.Expression.Index;
 import jmaker.parser.Expression.Symbol;
 import jmaker.parser.Expression.Unary;
+import jmaker.parser.ExpressionStatementKind;
 import jmaker.parser.Statement.Assignment;
 import jmaker.parser.Statement.BlockStatement;
 import jmaker.parser.Statement.Empty;
@@ -55,7 +56,7 @@ public class Interpreter {
 				runAssignment((Assignment) statement);
 			} else if (statement instanceof ExpressionStatement) {
 				var expression = (ExpressionStatement) statement;
-				if (expression.isCommand) {
+				if (expression.kind == ExpressionStatementKind.COMMAND) {
 					var command = runExpression(expression.expression);
 					if (command.getType() != DataType.String) {
 						throw new RuntimeException("Command expressions must return a string.");

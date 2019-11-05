@@ -1,5 +1,0 @@
-TEST = 2;
-
-"foo.class": "foo.java" {
-	> "javac " + deps[0] + " -o " + targets[0];
-}
