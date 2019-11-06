@@ -10,6 +10,7 @@ import codegen.JMakerParser.ForStatementContext;
 import codegen.JMakerParser.FunctionDefContext;
 import codegen.JMakerParser.IfStatementContext;
 import codegen.JMakerParser.RuleStatementContext;
+import codegen.JMakerParser.SimpleAssignmentContext;
 import codegen.JMakerParser.StatementContext;
 import codegen.JMakerParser.WhileStatementContext;
 import jmaker.interpreter.BooleanValue;
@@ -29,6 +30,9 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		}
 		if (context.ifStatement() != null) {
 			return visitIfStatement(context.ifStatement());
+		}
+		if (context.whileStatement() != null) {
+			return visitWhileStatement(context.whileStatement());
 		}
 		if (context.forStatement() != null) {
 			return visitForStatement(context.forStatement());
@@ -70,7 +74,7 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 	public Statement visitAssignment(AssignmentContext context) {
 		var symbol = new Expression.Symbol(context.NAME().getText());
 		var assignToken = (TerminalNode) context.assignOp().getChild(0);
-		var expression = parent.expressionVisitor.visit(context.expression());
+		var expression = parent.expressionVisitor.visitExpression(context.expression());
 
 		BinaryOperator rewriteOp;
 		switch (assignToken.getSymbol().getType()) {
@@ -178,16 +182,28 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		var cachedArray = parent.generateAnonymousName("array");
 		var cachedArrayLength = parent.generateAnonymousName("int");
 
-		var pseudoAssignment = (Statement.Assignment) visitSimpleAssignment(context.simpleAssignment());
-		var userVarName = pseudoAssignment.leftSide;
-		var arrayExpression = pseudoAssignment.rightSide;
-		var userBlock = parent.blockVisitor.visit(context.block());
+		var assignment = (Statement.Assignment) visitSimpleAssignment(context.simpleAssignment());
+		var userVarName = assignment.leftSide;
+		var arrayExpression = assignment.rightSide;
+		var userBlock = parent.blockVisitor.visitBlock(context.block());
 
-		var innerBlock = new Block(new Statement[]{
-			new Statement.Assignment(userVarName, new Expression.Index(cachedArray, incrementVar)),
-			new Statement.BlockStatement(userBlock),
-			new Statement.Assignment(incrementVar, new Expression.Binary(incrementVar, BinaryOperator.ADD, new IntegerValue(1)))
-		});
+		var innerBlockStatements = new Statement[userBlock.statements.length + 2];
+		innerBlockStatements[0] = new Statement.Assignment(userVarName, new Expression.Index(cachedArray, incrementVar));
+		for (int i = 1; i < innerBlockStatements.length - 1; i++) {
+			innerBlockStatements[i] = userBlock.statements[i - 1];
+		}
+		innerBlockStatements[innerBlockStatements.length - 1] = new Statement.Assignment(
+				//
+				incrementVar,
+				//
+				new Expression.Binary(
+						//
+						incrementVar,
+						//
+						BinaryOperator.ADD,
+						//
+						new IntegerValue(1)));
+		var innerBlock = new Block(innerBlockStatements);
 
 		var lengthFunctionCall = new Expression.FunctionCall(new Expression.Symbol("length"), new Expression[]{
 			cachedArray
@@ -219,15 +235,15 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		if (context.condition == null) {
 			condition = new BooleanValue(true);
 		} else {
-			condition = parent.expressionVisitor.visit(context.expression());
+			condition = parent.expressionVisitor.visitExpression(context.expression());
 		}
 
 		// Inner block and Update statement
-		Block innerBlock = parent.blockVisitor.visit(context.block());
+		Block innerBlock = parent.blockVisitor.visitBlock(context.block());
 		if (context.update != null) {
-			var newLength = innerBlock.statements.length;
+			var newLength = innerBlock.statements.length + 1;
 			var newStatements = Arrays.copyOf(innerBlock.statements, newLength);
-			newStatements[newLength - 1] = visitSimpleAssignment(context.update);
+			newStatements[newLength - 1] = visitAssignment(context.update);
 			innerBlock = new Block(newStatements);
 		}
 		var whileStatement = new Statement.WhileLoop(condition, innerBlock);
@@ -279,5 +295,12 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 
 			return new Statement.FunctionDefinition(functionName, args, pipeArg, block);
 		}
+	}
+
+	@Override
+	public Statement visitSimpleAssignment(SimpleAssignmentContext context) {
+		var name = new Expression.Symbol(context.NAME().getText());
+		var expression = parent.expressionVisitor.visitExpression(context.expression());
+		return new Statement.Assignment(name, expression);
 	}
 }

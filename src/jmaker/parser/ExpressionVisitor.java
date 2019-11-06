@@ -6,20 +6,17 @@ import codegen.JMakerParser.ArrayLiteralContext;
 import codegen.JMakerParser.DictLiteralContext;
 import codegen.JMakerParser.ExpressionContext;
 import codegen.JMakerParser.ExpressionListContext;
-import codegen.JMakerParser.Expression_otherContext;
 import codegen.JMakerParser.FunctionCallContext;
 import codegen.JMakerParser.IndexContext;
 import codegen.JMakerParser.LambdaContext;
 import codegen.JMakerParser.LiteralContext;
 import codegen.JMakerParser.PrimaryContext;
 import codegen.JMakerParser.UnambiguousVarContext;
-import codegen.JMakerParser.UnaryContext;
 import jmaker.interpreter.BooleanValue;
 import jmaker.interpreter.DoubleValue;
 import jmaker.interpreter.IntegerValue;
 import jmaker.interpreter.PathValue;
 import jmaker.interpreter.StringValue;
-import jmaker.parser.Expression.Symbol;
 
 public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 	private final VisitorManager parent;
@@ -30,28 +27,25 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 
 	@Override
 	public Expression visitExpression(ExpressionContext context) {
-		if (context.expression_other() != null) {
-			return visitExpression_other(context.expression_other());
+		if (context.binop == null) {
+			return visitNonbinaryExpression(context);
 		}
 		var left = visitExpression(context.left);
 		var right = visitExpression(context.right);
 		var op = context.binop;
-
-		return finishVisitingExpression(left, op, right);
-	}
-
-	@Override
-	public Expression visitExpression_other(Expression_otherContext context) {
-		if (context.binop == null) {
-			return visitNonbinaryExpression(context);
+		var ret = visitBinaryExpression(left, op, right);
+		if (ret.operator.isComparisonOperator()) {
+			if (context.left.binop != null) {
+				if (((Expression.Binary) left).operator.isComparisonOperator()) {
+					throw new RuntimeException("Cannot chain comparison operators");
+				}
+			}
 		}
-		var left = visitExpression_other(context.left);
-		var right = visitExpression_other(context.right);
-		var op = context.binop;
-		return finishVisitingExpression(left, op, right);
+
+		return ret;
 	}
 
-	private static Expression finishVisitingExpression(Expression left, Token op, Expression right) {
+	private static Expression.Binary visitBinaryExpression(Expression left, Token op, Expression right) {
 		BinaryOperator parsedOp;
 		switch (op.getType()) {
 			case JMakerLexer.PIPE:
@@ -96,13 +90,24 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 			default:
 				throw new RuntimeException("Unrecognized binary operator: " + op.getType());
 		}
-
 		return new Expression.Binary(left, parsedOp, right);
 	}
 
-	private Expression visitNonbinaryExpression(Expression_otherContext context) {
-		if (context.unary() != null) {
-			return visitUnary(context.unary());
+	private Expression visitNonbinaryExpression(ExpressionContext context) {
+		if (context.unop != null) {
+			var expression = visitExpression(context.right);
+			UnaryOperator op;
+			switch (context.unop.getType()) {
+				case JMakerLexer.BANG:
+					op = UnaryOperator.NOT;
+					break;
+				case JMakerLexer.MINUS:
+					op = UnaryOperator.NEGATE;
+					break;
+				default:
+					throw new RuntimeException();
+			}
+			return new Expression.Unary(expression, op);
 		}
 		if (context.primary() != null) {
 			return visitPrimary(context.primary());
@@ -114,23 +119,6 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 			return visitLambda(context.lambda());
 		}
 		throw new RuntimeException();
-	}
-
-	@Override
-	public Expression visitUnary(UnaryContext context) {
-		UnaryOperator op;
-		var expression = visitExpression(context.expression());
-		switch (context.unop.getType()) {
-			case JMakerLexer.BANG:
-				op = UnaryOperator.NOT;
-				break;
-			case JMakerLexer.MINUS:
-				op = UnaryOperator.NEGATE;
-				break;
-			default:
-				throw new RuntimeException();
-		}
-		return new Expression.Unary(expression, op);
 	}
 
 	@Override
@@ -165,18 +153,15 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 	public Expression visitLambda(LambdaContext context) {
 		var argNames = context.lambdaArgs().NAME();
 		Expression.Symbol[] argSymbols;
-		if (argNames == null) {
-			argSymbols = new Symbol[0];
-		} else {
-			argSymbols = new Expression.Symbol[argNames.size()];
-			for (int i = 0; i < argNames.size(); i++) {
-				argSymbols[i] = new Expression.Symbol(argNames.get(i).getText());
-			}
+
+		argSymbols = new Expression.Symbol[argNames.size()];
+		for (int i = 0; i < argNames.size(); i++) {
+			argSymbols[i] = new Expression.Symbol(argNames.get(i).getText());
 		}
 
 		Block innerBlock;
 		if (context.block() != null) {
-			innerBlock = parent.blockVisitor.visit(context.block());
+			innerBlock = parent.blockVisitor.visitBlock(context.block());
 		} else {
 			var expression = visitExpression(context.expression());
 			innerBlock = new Block(new Statement[]{

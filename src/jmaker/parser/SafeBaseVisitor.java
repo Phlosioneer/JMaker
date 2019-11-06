@@ -12,7 +12,6 @@ import codegen.JMakerParser.DictLiteralContext;
 import codegen.JMakerParser.ElseIfStatementContext;
 import codegen.JMakerParser.ExpressionContext;
 import codegen.JMakerParser.ExpressionListContext;
-import codegen.JMakerParser.Expression_otherContext;
 import codegen.JMakerParser.FileContext;
 import codegen.JMakerParser.ForEachContext;
 import codegen.JMakerParser.ForManualContext;
@@ -32,7 +31,6 @@ import codegen.JMakerParser.RuleStatementContext;
 import codegen.JMakerParser.SimpleAssignmentContext;
 import codegen.JMakerParser.StatementContext;
 import codegen.JMakerParser.UnambiguousVarContext;
-import codegen.JMakerParser.UnaryContext;
 import codegen.JMakerParser.WhileStatementContext;
 import codegen.JMakerParserVisitor;
 
@@ -78,11 +76,6 @@ public class SafeBaseVisitor<T> implements JMakerParserVisitor<T> {
 	}
 
 	@Override
-	public T visitExpression_other(Expression_otherContext context) {
-		throw new RuntimeException();
-	}
-
-	@Override
 	public T visitAssignOp(AssignOpContext context) {
 		throw new RuntimeException();
 	}
@@ -94,11 +87,6 @@ public class SafeBaseVisitor<T> implements JMakerParserVisitor<T> {
 
 	@Override
 	public T visitIndexBrackets(IndexBracketsContext context) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public T visitUnary(UnaryContext context) {
 		throw new RuntimeException();
 	}
 

@@ -6,7 +6,7 @@ options { tokenVocab = JMakerLexer; }
 file : statement*;
 
 statement :
-	  assignment
+	  assignment SEMICOLON
 	| ifStatement
 	| whileStatement
 	| forStatement
@@ -16,7 +16,7 @@ statement :
 	| block
 	| functionDef;
 
-assignment : NAME assignOp expression SEMICOLON;
+assignment : NAME assignOp expression;
 assignOp : EQUALS | PLUS_EQUAL | MINUS_EQUAL | STAR_EQUAL | SLASH_EQUAL | AMP_EQUAL | PIPE_EQUAL; 
 
 ifStatement : IF ifCondition=expression ifBlock=block elseIfStatement* (ELSE elseBlock=block)?;
@@ -28,7 +28,7 @@ forStatement : forManual | forEach;
 forManual : FOR PAREN_LEFT
 	init=simpleAssignment? SEMICOLON
 	condition=expression? SEMICOLON
-	update=simpleAssignment? PAREN_RIGHT block;
+	update=assignment? PAREN_RIGHT block;
 forEach : FOR PAREN_LEFT simpleAssignment PAREN_RIGHT block;
 simpleAssignment : NAME EQUALS expression;
 
@@ -41,6 +41,22 @@ block : CURL_LEFT statement* CURL_RIGHT;
 
 expressionList : expression (COMMA expression)*;
 
+expression
+	: unambiguousVar
+	| primary
+	| lambda
+	| unop=(BANG | MINUS) right=expression
+	| left=expression binop=(STAR | FORWARD_SLASH) right=expression
+	| left=expression binop=(PLUS | MINUS) right=expression
+	| left=expression
+		binop=
+			( DOUBLE_EQUAL | BANG_EQUAL | ANGLE_LEFT | ANGLE_RIGHT 
+			| LESS_EQUAL | GREATER_EQUAL)
+		right=expression
+	| left=expression binop=(DOUBLE_AMP | DOUBLE_PIPE) right=expression
+	| left=expression binop=PIPE right=expression;
+	
+/*
 expression
 	: left=expression binop = PIPE right=expression
 	| left=expression binop = (DOUBLE_AMP | DOUBLE_PIPE) right=expression
@@ -58,8 +74,8 @@ expression_other
 	| primary
 	| unambiguousVar
 	| lambda;
+*/
 
-unary : unop=(BANG | MINUS) expression;
 primary : literal | PAREN_LEFT expression PAREN_RIGHT | functionCall;
 
 unambiguousVar : PAREN_LEFT expression PAREN_RIGHT | NAME | index;

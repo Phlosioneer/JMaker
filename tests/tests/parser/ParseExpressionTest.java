@@ -1,4 +1,4 @@
-package tests;
+package tests.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,8 +13,9 @@ import jmaker.parser.Expression;
 import jmaker.parser.ExpressionStatementKind;
 import jmaker.parser.Statement;
 import jmaker.parser.UnaryOperator;
+import tests.TestUtil;
 
-class ParserTest {
+class ParseExpressionTest {
 
 	@Test
 	void testEmptyStatement() {
@@ -168,27 +169,6 @@ class ParserTest {
 	}
 
 	@Test
-	void testElseIfWithoutFinalElse() {
-		var output = TestUtil.parseProgram("if (true) {\"foo\";} else if (false) {7;}");
-
-		var expectedTree = new Block(new Statement[]{
-			new Statement.If(
-					//
-					new Expression[]{
-						new BooleanValue(true),
-						new BooleanValue(false)
-					},
-					//
-					new Block[]{
-						TestUtil.expressionToBlock(new StringValue("foo")),
-						TestUtil.expressionToBlock(new IntegerValue(7))
-					})
-		});
-
-		assertEquals(expectedTree, output);
-	}
-
-	@Test
 	void testIndirectFunctionCall() {
 		var output = TestUtil.parseProgram("(foo[0])(\"bar\", 5 + 3);");
 
@@ -309,21 +289,99 @@ class ParserTest {
 	}
 
 	@Test
+	void testLambda() {
+		Block output;
+		Block expectedTree;
+
+		var lambdaName = new Expression.Symbol("<anon-function-0>");
+
+		output = TestUtil.parseProgram("()->7;");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Lambda(
+						//
+						new Statement.FunctionDefinition(
+								//
+								lambdaName,
+								//
+								new Expression.Symbol[]{},
+								//
+								0,
+								//
+								TestUtil.statementToBlock(
+										//
+										new Statement.ExpressionStatement(
+												//
+												new IntegerValue(7),
+												//
+												ExpressionStatementKind.RETURN)))));
+		assertEquals(expectedTree, output);
+
+		output = TestUtil.parseProgram("x->x + foo(x, 2);");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Lambda(new Statement.FunctionDefinition(
+						//
+						lambdaName,
+						//
+						new Expression.Symbol[]{
+							new Expression.Symbol("x")
+						},
+						//
+						0,
+						//
+						TestUtil.statementToBlock(
+								//
+								new Statement.ExpressionStatement(
+										//
+										new Expression.Binary(
+												//
+												new Expression.Symbol("x"),
+												//
+												BinaryOperator.ADD,
+												//
+												new Expression.FunctionCall(
+														//
+														new Expression.Symbol("foo"),
+														//
+														new Expression[]{
+															new Expression.Symbol("x"),
+															new IntegerValue(2)
+														})),
+										//
+										ExpressionStatementKind.RETURN)))));
+		assertEquals(expectedTree, output);
+
+		output = TestUtil.parseProgram("(x, y)->{3;};");
+		expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Lambda(new Statement.FunctionDefinition(
+						//
+						lambdaName,
+						//
+						new Expression.Symbol[]{
+							new Expression.Symbol("x"),
+							new Expression.Symbol("y")
+						},
+						//
+						0,
+						//
+						TestUtil.expressionToBlock(new IntegerValue(3)))));
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
 	void testArrayLiteral() {
 		var output = TestUtil.parseProgram("[4, 2, true, []];");
 
-		var expectedTree = new Block(new Statement[]{
-			new Statement.ExpressionStatement(
-					//
-					new Expression.Array(new Expression[]{
-						new IntegerValue(4),
-						new IntegerValue(2),
-						new BooleanValue(true),
-						new Expression.Array(new Expression[]{})
-					}),
-					//
-					ExpressionStatementKind.NORMAL)
-		});
+		var expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Array(new Expression[]{
+					new IntegerValue(4),
+					new IntegerValue(2),
+					new BooleanValue(true),
+					new Expression.Array(new Expression[]{})
+				}));
 
 		assertEquals(expectedTree, output);
 	}
@@ -332,35 +390,54 @@ class ParserTest {
 	void testDictLiteral() {
 		var output = TestUtil.parseProgram("{2: 2, \"foo\": bar, 2: baz, [fizz, 7.5]: {}};");
 
-		var expectedTree = new Block(new Statement[]{
-			new Statement.ExpressionStatement(
-					//
-					new Expression.Dictionary(
-							//
-							new Expression[]{
-								new IntegerValue(2),
-								new StringValue("foo"),
-								new IntegerValue(2),
-								new Expression.Array(new Expression[]{
-									new Expression.Symbol("fizz"),
-									new DoubleValue(7.5)
-								})
-							},
-							//
-							new Expression[]{
-								new IntegerValue(2),
-								new Expression.Symbol("bar"),
-								new Expression.Symbol("baz"),
-								new Expression.Dictionary(
-										//
-										new Expression[]{},
-										//
-										new Expression[]{})
-							}),
-					//
-					ExpressionStatementKind.NORMAL)
-		});
+		var expectedTree = TestUtil.expressionToBlock(
+				//
+				new Expression.Dictionary(
+						//
+						new Expression[]{
+							new IntegerValue(2),
+							new StringValue("foo"),
+							new IntegerValue(2),
+							new Expression.Array(new Expression[]{
+								new Expression.Symbol("fizz"),
+								new DoubleValue(7.5)
+							})
+						},
+						//
+						new Expression[]{
+							new IntegerValue(2),
+							new Expression.Symbol("bar"),
+							new Expression.Symbol("baz"),
+							new Expression.Dictionary(
+									//
+									new Expression[]{},
+									//
+									new Expression[]{})
+						}));
 
 		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testOrderOfOperations() {
+		Block output;
+		Block expectedTree;
+
+		output = TestUtil.parseProgram("-2 < 2;");
+		expectedTree = TestUtil.expressionToBlock(new Expression.Binary(
+				//
+				new Expression.Unary(new IntegerValue(2), UnaryOperator.NEGATE),
+				//
+				BinaryOperator.LESS,
+				//
+				new IntegerValue(2)));
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testCannotChainLogic() {
+		assertThrows(RuntimeException.class, ()-> {
+			TestUtil.parseProgram("true == false != true;");
+		});
 	}
 }
