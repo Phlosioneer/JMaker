@@ -40,6 +40,8 @@ class CoverageTrick {
 		new Statement.Rule(new Expression[]{
 			dummyExpr
 		}, new Expression[]{}, dummyBlock).hashCode();
+		var functionDef = new Statement.FunctionDefinition(new Expression.Symbol("foo"), new Expression.Symbol[]{}, 0, dummyBlock);
+		functionDef.hashCode();
 		new Statement.Empty().hashCode();
 
 		// The expressions.
@@ -48,6 +50,10 @@ class CoverageTrick {
 		new Expression.Index(dummyExpr, dummyExpr).hashCode();
 		new Expression.Symbol("foo").hashCode();
 		new Expression.Unary(dummyExpr, UnaryOperator.NEGATE).hashCode();
+		new Expression.Array(new Expression[]{}).hashCode();
+		new Expression.Dictionary(new Expression[]{}, new Expression[]{}).hashCode();
+		new Expression.Lambda(functionDef).hashCode();
+		new Expression.IndexRange(dummyExpr, dummyExpr, dummyExpr).hashCode();
 
 		// The values.
 		new BooleanValue(false).hashCode();
