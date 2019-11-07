@@ -16,14 +16,13 @@ import codegen.JMakerParser.WhileStatementContext;
 import jmaker.interpreter.BooleanValue;
 import jmaker.interpreter.IntegerValue;
 
-public class StatementVisitor extends SafeBaseVisitor<Statement> {
+public class StatementVisitor {
 	private final VisitorManager parent;
 
 	public StatementVisitor(VisitorManager parent) {
 		this.parent = parent;
 	}
 
-	@Override
 	public Statement visitStatement(StatementContext context) {
 		if (context.assignment() != null) {
 			return visitAssignment(context.assignment());
@@ -41,7 +40,7 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 			return visitRuleStatement(context.ruleStatement());
 		}
 		if (context.block() != null) {
-			var block = parent.blockVisitor.visit(context.block());
+			var block = parent.blockVisitor.visitBlock(context.block());
 			return new Statement.BlockStatement(block);
 		}
 		if (context.functionDef() != null) {
@@ -50,7 +49,7 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		if (context.RETURN() != null) {
 			Expression inner;
 			if (context.expression() != null) {
-				inner = parent.expressionVisitor.visit(context.expression());
+				inner = parent.expressionVisitor.visitExpression(context.expression());
 			} else {
 				inner = null;
 			}
@@ -70,7 +69,6 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		}
 	}
 
-	@Override
 	public Statement visitAssignment(AssignmentContext context) {
 		var symbol = new Expression.Symbol(context.NAME().getText());
 		var assignToken = (TerminalNode) context.assignOp().getChild(0);
@@ -109,7 +107,6 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		return new Statement.Assignment(symbol, newExpression);
 	}
 
-	@Override
 	public Statement visitIfStatement(IfStatementContext context) {
 		Expression[] conditions;
 		Block[] elseBlocks;
@@ -147,14 +144,12 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		}
 	}
 
-	@Override
 	public Statement visitWhileStatement(WhileStatementContext context) {
 		var expression = parent.expressionVisitor.visitExpression(context.expression());
 		var block = parent.blockVisitor.visitBlock(context.block());
 		return new Statement.WhileLoop(expression, block);
 	}
 
-	@Override
 	public Statement visitForStatement(ForStatementContext context) {
 		if (context.forManual() != null) {
 			return visitForManual(context.forManual());
@@ -164,7 +159,6 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		}
 	}
 
-	@Override
 	public Statement visitForEach(ForEachContext context) {
 		// Rewrite "for (Name = Expression) Block" as:
 		// {
@@ -219,7 +213,6 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		return new Statement.BlockStatement(outerBlock);
 	}
 
-	@Override
 	public Statement visitForManual(ForManualContext context) {
 		// Rewrite "or (Assign1; Conditional; Assign2) Block" as:
 		// {
@@ -259,7 +252,6 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		}
 	}
 
-	@Override
 	public Statement visitRuleStatement(RuleStatementContext context) {
 		var targets = parent.expressionVisitor.tryParseExpressionList(context.targets);
 		var deps = parent.expressionVisitor.tryParseExpressionList(context.deps);
@@ -267,7 +259,6 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		return new Statement.Rule(targets, deps, block);
 	}
 
-	@Override
 	public Statement visitFunctionDef(FunctionDefContext context) {
 		var functionName = new Expression.Symbol(context.NAME().getText());
 		var rawArgs = context.funcDefArg();
@@ -297,7 +288,6 @@ public class StatementVisitor extends SafeBaseVisitor<Statement> {
 		}
 	}
 
-	@Override
 	public Statement visitSimpleAssignment(SimpleAssignmentContext context) {
 		var name = new Expression.Symbol(context.NAME().getText());
 		var expression = parent.expressionVisitor.visitExpression(context.expression());

@@ -18,14 +18,13 @@ import jmaker.interpreter.IntegerValue;
 import jmaker.interpreter.PathValue;
 import jmaker.interpreter.StringValue;
 
-public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
+public class ExpressionVisitor {
 	private final VisitorManager parent;
 
 	public ExpressionVisitor(VisitorManager parent) {
 		this.parent = parent;
 	}
 
-	@Override
 	public Expression visitExpression(ExpressionContext context) {
 		if (context.binop == null) {
 			return visitNonbinaryExpression(context);
@@ -121,7 +120,6 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 		throw new RuntimeException();
 	}
 
-	@Override
 	public Expression visitPrimary(PrimaryContext context) {
 		if (context.literal() != null) {
 			return visitLiteral(context.literal());
@@ -135,7 +133,6 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 		throw new RuntimeException();
 	}
 
-	@Override
 	public Expression visitUnambiguousVar(UnambiguousVarContext context) {
 		if (context.expression() != null) {
 			return visitExpression(context.expression());
@@ -149,7 +146,6 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 		throw new RuntimeException();
 	}
 
-	@Override
 	public Expression visitLambda(LambdaContext context) {
 		var argNames = context.lambdaArgs().NAME();
 		Expression.Symbol[] argSymbols;
@@ -175,7 +171,6 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 		return new Expression.Lambda(definition);
 	}
 
-	@Override
 	public Expression visitIndex(IndexContext context) {
 		Expression current;
 		if (context.NAME() != null) {
@@ -225,14 +220,12 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 		}
 	}
 
-	@Override
 	public Expression visitFunctionCall(FunctionCallContext context) {
 		var functionRef = visitUnambiguousVar(context.unambiguousVar());
 		var args = tryParseExpressionList(context.expressionList());
 		return new Expression.FunctionCall(functionRef, args);
 	}
 
-	@Override
 	public Expression visitLiteral(LiteralContext context) {
 		if (context.arrayLiteral() != null) {
 			return visitArrayLiteral(context.arrayLiteral());
@@ -258,13 +251,11 @@ public class ExpressionVisitor extends SafeBaseVisitor<Expression> {
 		return new DoubleValue(Double.parseDouble(separatorsRemoved));
 	}
 
-	@Override
 	public Expression visitArrayLiteral(ArrayLiteralContext context) {
 		var elements = tryParseExpressionList(context.expressionList());
 		return new Expression.Array(elements);
 	}
 
-	@Override
 	public Expression visitDictLiteral(DictLiteralContext context) {
 		var pairs = context.keyValuePair();
 		var keys = new Expression[pairs.size()];

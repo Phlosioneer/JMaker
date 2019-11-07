@@ -6,7 +6,7 @@ import codegen.JMakerParser.BlockContext;
 import codegen.JMakerParser.FileContext;
 import codegen.JMakerParser.StatementContext;
 
-public class BlockVisitor extends SafeBaseVisitor<Block> {
+public class BlockVisitor {
 	private final VisitorManager parent;
 
 	public BlockVisitor(VisitorManager parent) {
@@ -23,12 +23,10 @@ public class BlockVisitor extends SafeBaseVisitor<Block> {
 		return new Block(statements);
 	}
 
-	@Override
 	public Block visitFile(FileContext context) {
 		return visitStatements(context.statement());
 	}
 
-	@Override
 	public Block visitBlock(BlockContext context) {
 		return visitStatements(context.statement());
 	}
