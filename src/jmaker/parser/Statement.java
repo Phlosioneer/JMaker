@@ -4,16 +4,9 @@ import java.util.Arrays;
 import java.util.Objects;
 import jmaker.parser.Expression.Symbol;
 
-public class Statement {
+public interface Statement {
 
-	protected Statement() {}
-
-	@Override
-	public String toString() {
-		throw new UnsupportedOperationException(getClass().getName() + " MUST implement toString");
-	}
-
-	public static class ExpressionStatement extends Statement {
+	public static class ExpressionStatement implements Statement {
 		// Can be null if kind == RETURN.
 		public final Expression expression;
 		public final ExpressionStatementKind kind;
@@ -41,7 +34,7 @@ public class Statement {
 		}
 	}
 
-	public static class Assignment extends Statement {
+	public static class Assignment implements Statement {
 		// The left side isn't an arbitrary expression - it's a name followed by
 		// any number of index expressions.
 		public final Symbol leftSide;
@@ -70,7 +63,7 @@ public class Statement {
 		}
 	}
 
-	public static class WhileLoop extends Statement {
+	public static class WhileLoop implements Statement {
 		public final Block block;
 		public final Expression condition;
 
@@ -104,7 +97,7 @@ public class Statement {
 		}
 	}
 
-	public static class If extends Statement {
+	public static class If implements Statement {
 		public final Expression[] conditionals;
 		public final Block[] blocks;
 		public final Block elseBlock;
@@ -146,7 +139,7 @@ public class Statement {
 		}
 	}
 
-	public static class BlockStatement extends Statement {
+	public static class BlockStatement implements Statement {
 		public final Block block;
 
 		public BlockStatement(Block block) {
@@ -171,7 +164,7 @@ public class Statement {
 		}
 	}
 
-	public static class Rule extends Statement {
+	public static class Rule implements Statement {
 		public final Expression[] targets;
 		public final Expression[] dependencies;
 		public final Block block;
@@ -206,7 +199,7 @@ public class Statement {
 		}
 	}
 
-	public static class FunctionDefinition extends Statement {
+	public static class FunctionDefinition implements Statement {
 		public final Symbol[] argNames;
 		public final int pipeArg;
 		public final Symbol functionName;
@@ -245,7 +238,7 @@ public class Statement {
 		}
 	}
 
-	public static class Empty extends Statement {
+	public static class Empty implements Statement {
 		@Override
 		public int hashCode() {
 			return 0;
