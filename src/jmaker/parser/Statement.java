@@ -107,10 +107,6 @@ public interface Statement {
 		}
 
 		public If(Expression[] conditionals, Block[] blocks, Block elseBlock) {
-			assert (conditionals != null);
-			assert (blocks != null);
-			assert (conditionals.length > 0);
-			assert (conditionals.length == blocks.length);
 			this.conditionals = conditionals;
 			this.blocks = blocks;
 			this.elseBlock = elseBlock;
