@@ -1,6 +1,5 @@
 package jmaker.parser;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import jmaker.parser.Statement.FunctionDefinition;
@@ -8,10 +7,6 @@ import jmaker.parser.Statement.FunctionDefinition;
 public interface Expression {
 	public static class Array implements Expression {
 		public final Expression[] elements;
-
-		public Array(ArrayList<Expression> elements) {
-			this(elements.toArray(size->new Expression[size]));
-		}
 
 		public Array(Expression[] elements) {
 			this.elements = elements;
@@ -41,10 +36,6 @@ public interface Expression {
 	public static class Dictionary implements Expression {
 		public final Expression[] keys;
 		public final Expression[] values;
-
-		public Dictionary(ArrayList<Expression> keys, ArrayList<Expression> values) {
-			this(keys.toArray(size->new Expression[size]), values.toArray(size->new Expression[size]));
-		}
 
 		public Dictionary(Expression[] keys, Expression[] values) {
 			this.keys = keys;
@@ -159,10 +150,6 @@ public interface Expression {
 	public static class FunctionCall implements Expression {
 		public final Expression functionName;
 		public final Expression[] args;
-
-		public FunctionCall(Expression functionName, ArrayList<Expression> args) {
-			this(functionName, args.toArray(size->new Expression[size]));
-		}
 
 		public FunctionCall(Expression functionName, Expression[] args) {
 			this.functionName = functionName;

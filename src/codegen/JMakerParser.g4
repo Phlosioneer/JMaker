@@ -14,7 +14,8 @@ statement :
 	| ANGLE_RIGHT? expression SEMICOLON
 	| RETURN expression? SEMICOLON
 	| block
-	| functionDef;
+	| functionDef
+	| SEMICOLON;
 
 assignment : NAME assignOp expression;
 assignOp : EQUALS | PLUS_EQUAL | MINUS_EQUAL | STAR_EQUAL | SLASH_EQUAL | AMP_EQUAL | PIPE_EQUAL; 

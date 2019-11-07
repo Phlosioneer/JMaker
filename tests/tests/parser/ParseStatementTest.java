@@ -10,7 +10,7 @@ import jmaker.parser.Block;
 import jmaker.parser.Expression;
 import jmaker.parser.ExpressionStatementKind;
 import jmaker.parser.Statement;
-import tests.TestUtil;
+import tests.interpreter.TestUtil;
 
 class ParseStatementTest {
 
@@ -251,5 +251,96 @@ class ParseStatementTest {
 		assertEquals(expectedTree, output);
 	}
 
-	// TODO: Rules and function definitions. Then I'm done!
+	@Test
+	void testRules() {
+		Block output;
+		Block expectedTree;
+
+		output = TestUtil.parseProgram("'*.o' : '*.c', '*.h' {}");
+		expectedTree = TestUtil.statementToBlock(new Statement.Rule(
+				//
+				new Expression[]{
+					new StringValue("*.o")
+				},
+				//
+				new Expression[]{
+					new StringValue("*.c"),
+					new StringValue("*.h")
+				},
+				//
+				new Block(new Statement[]{})));
+		assertEquals(expectedTree, output);
+
+		output = TestUtil.parseProgram("'foo' : {}");
+		expectedTree = TestUtil.statementToBlock(new Statement.Rule(
+				//
+				new Expression[]{
+					new StringValue("foo")
+				},
+				//
+				new Expression[]{},
+				//
+				new Block(new Statement[]{})));
+	}
+
+	@Test
+	void testFunctionDefinition() {
+		Block output;
+		Block expectedTree;
+
+		output = TestUtil.parseProgram("function foo() {}");
+		expectedTree = TestUtil.statementToBlock(new Statement.FunctionDefinition(
+				//
+				new Expression.Symbol("foo"),
+				//
+				new Expression.Symbol[]{},
+				//
+				0,
+				//
+				new Block(new Statement[]{})));
+		assertEquals(expectedTree, output);
+
+		output = TestUtil.parseProgram("function foo(bar, a, b) { 3; }");
+		expectedTree = TestUtil.statementToBlock(new Statement.FunctionDefinition(
+				//
+				new Expression.Symbol("foo"),
+				//
+				new Expression.Symbol[]{
+					new Expression.Symbol("bar"),
+					new Expression.Symbol("a"),
+					new Expression.Symbol("b")
+				},
+				//
+				0,
+				//
+				TestUtil.expressionToBlock(new IntegerValue(3))));
+		assertEquals(expectedTree, output);
+
+		output = TestUtil.parseProgram("function foo(bar, a*, b) { 3; }");
+		expectedTree = TestUtil.statementToBlock(new Statement.FunctionDefinition(
+				//
+				new Expression.Symbol("foo"),
+				//
+				new Expression.Symbol[]{
+					new Expression.Symbol("bar"),
+					new Expression.Symbol("a"),
+					new Expression.Symbol("b")
+				},
+				//
+				1,
+				//
+				TestUtil.expressionToBlock(new IntegerValue(3))));
+		assertEquals(expectedTree, output);
+	}
+
+	@Test
+	void testEmptyStatement() {
+		var output = TestUtil.parseProgram(";;;");
+		var expectedTree = new Block(new Statement[]{
+			new Statement.Empty(),
+			new Statement.Empty(),
+			new Statement.Empty()
+		});
+		assertEquals(expectedTree, output);
+	}
 }

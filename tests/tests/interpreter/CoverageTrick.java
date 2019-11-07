@@ -1,4 +1,4 @@
-package tests;
+package tests.interpreter;
 
 import java.util.HashMap;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class CoverageTrick {
 		new Statement.ExpressionStatement(dummyExpr, ExpressionStatementKind.NORMAL).hashCode();
 		new Statement.Assignment(new Expression.Symbol("foo"), dummyExpr).hashCode();
 		new Statement.WhileLoop(dummyExpr, dummyBlock).hashCode();
-		new Statement.If(dummyExpr, dummyBlock).hashCode();
+		new Statement.If(new Expression[]{}, new Block[]{}).hashCode();
 		new Statement.BlockStatement(dummyBlock).hashCode();
 		new Statement.Rule(new Expression[]{
 			dummyExpr

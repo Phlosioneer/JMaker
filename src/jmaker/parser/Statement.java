@@ -1,6 +1,5 @@
 package jmaker.parser;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import jmaker.parser.Expression.Symbol;
@@ -110,28 +109,8 @@ public class Statement {
 		public final Block[] blocks;
 		public final Block elseBlock;
 
-		public If(Expression conditional, Block block) {
-			assert (conditional != null);
-			assert (block != null);
-			conditionals = new Expression[]{
-				conditional
-			};
-			blocks = new Block[]{
-				block
-			};
-			elseBlock = null;
-		}
-
-		public If(ArrayList<Expression> conditionals, ArrayList<Block> blocks) {
-			this(conditionals.toArray(size->new Expression[size]), blocks.toArray(size->new Block[size]));
-		}
-
 		public If(Expression[] conditionals, Block[] blocks) {
 			this(conditionals, blocks, null);
-		}
-
-		public If(ArrayList<Expression> conditionals, ArrayList<Block> blocks, Block elseBlock) {
-			this(conditionals.toArray(size->new Expression[size]), blocks.toArray(size->new Block[size]), elseBlock);
 		}
 
 		public If(Expression[] conditionals, Block[] blocks, Block elseBlock) {
@@ -196,10 +175,6 @@ public class Statement {
 		public final Expression[] targets;
 		public final Expression[] dependencies;
 		public final Block block;
-
-		public Rule(ArrayList<Expression> targets, ArrayList<Expression> dependencies, Block block) {
-			this(targets.toArray(size->new Expression[size]), dependencies.toArray(size->new Expression[size]), block);
-		}
 
 		public Rule(Expression[] targets, Expression[] dependencies, Block block) {
 			this.targets = targets;

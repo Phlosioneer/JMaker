@@ -13,18 +13,9 @@ import jmaker.parser.Expression;
 import jmaker.parser.ExpressionStatementKind;
 import jmaker.parser.Statement;
 import jmaker.parser.UnaryOperator;
-import tests.TestUtil;
+import tests.interpreter.TestUtil;
 
 class ParseExpressionTest {
-
-	@Test
-	void testEmptyStatement() {
-		var output = TestUtil.parseProgram(";");
-
-		var expectedTree = new Block(new Statement[]{});
-
-		assertEquals(expectedTree, output);
-	}
 
 	// Helper for testNumbers
 	private static Block numberToBlock(int num) {
